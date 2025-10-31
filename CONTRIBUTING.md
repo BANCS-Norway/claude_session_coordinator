@@ -56,11 +56,15 @@ This project uses a **rebase-only workflow** to maintain a clean, linear Git his
 
 ### Branch Protection Rules
 
-- Direct commits to `main` are blocked
-- Only rebase and merge allowed (no squash, no merge commits)
-- Branches must be up to date with main before merging
-- Linear history enforced
-- Force pushes disabled on main
+The repository is configured to enforce a clean, linear Git history:
+
+- **Direct commits to `main` are blocked** - All changes must go through pull requests
+- **Only rebase and merge allowed** - Merge commits and squash merging are disabled
+- **Branches must be up to date with main before merging** - GitHub will require you to rebase on the latest main before allowing merge
+- **Linear history enforced** - The commit history must be linear (no merge commits)
+- **Force pushes disabled on main** - Main branch is protected from force pushes
+
+These settings ensure every commit in main is a meaningful, atomic change that can be easily reviewed, reverted, or bisected.
 
 ### Branch Naming Conventions
 
@@ -118,6 +122,63 @@ git push --force-with-lease origin your-feature-branch
 ```
 
 **Important:** Use `--force-with-lease` instead of `--force` to avoid accidentally overwriting work.
+
+### Why Rebase-Only Workflow?
+
+This repository enforces a rebase-only workflow for several important reasons:
+
+**Clean History:**
+- Linear commit history without merge bubbles
+- Easy to read `git log` output
+- Simple to understand project evolution
+- Straightforward to bisect when debugging
+
+**Integration Safety:**
+- PRs must be rebased on latest main before merge
+- Ensures all changes are tested against current codebase
+- Prevents "works on my branch" integration issues
+- Reduces merge conflicts and integration bugs
+
+**Best Practices:**
+- Follows modern Git workflow patterns
+- Makes reverting changes simpler
+- Each commit in main represents a complete, tested change
+- Reduces repository clutter
+
+### What Happens When Your PR is Not Up-to-Date?
+
+When main has new commits after you created your branch, GitHub will prevent merging your PR with a message like:
+
+> "This branch is out-of-date with the base branch"
+
+**To resolve this:**
+
+1. Fetch the latest changes from upstream:
+   ```bash
+   git fetch upstream
+   ```
+
+2. Rebase your branch on the latest main:
+   ```bash
+   git checkout your-feature-branch
+   git rebase upstream/main
+   ```
+
+3. Resolve any conflicts if they occur:
+   ```bash
+   # Edit conflicted files in your editor
+   git add <resolved-files>
+   git rebase --continue
+   ```
+
+4. Force push your rebased branch:
+   ```bash
+   git push --force-with-lease origin your-feature-branch
+   ```
+
+5. GitHub will now allow your PR to be merged
+
+**Note:** After rebasing, your commit SHAs will change (this is normal and expected). The `--force-with-lease` flag ensures you don't accidentally overwrite any work that may have been pushed to your branch by someone else.
 
 ## Making Changes
 
