@@ -5,9 +5,9 @@ to coordinate work across machines through flexible storage adapters.
 """
 
 from .adapters import StorageAdapter, LocalFileAdapter, AdapterFactory, StorageError
-from .config import load_config, get_default_config, save_config
+from .config import load_config, get_default_config, save_config, validate_config
 from .detection import detect_machine_id, detect_project_id
-from .server import app, initialize_server, main
+# from .server import app, initialize_server, main  # Temporarily disabled for issue #4 testing
 
 __version__ = "0.1.0"
 
@@ -21,11 +21,12 @@ __all__ = [
     "load_config",
     "get_default_config",
     "save_config",
+    "validate_config",
     # Detection
     "detect_machine_id",
     "detect_project_id",
-    # Server
-    "app",
-    "initialize_server",
-    "main",
+    # Server (temporarily disabled for issue #4 testing)
+    # "app",
+    # "initialize_server",
+    # "main",
 ]

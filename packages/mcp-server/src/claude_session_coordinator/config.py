@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional, cast
 
 
 def load_config() -> Dict[str, Any]:
@@ -59,7 +59,7 @@ def _load_config_file(config_path: Path) -> Dict[str, Any]:
         Configuration dictionary
     """
     with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        return cast(Dict[str, Any], json.load(f))
 
 
 def get_default_config() -> Dict[str, Any]:
@@ -82,6 +82,39 @@ def get_default_config() -> Dict[str, Any]:
     }
 
 
+def validate_config(config: Dict[str, Any]) -> bool:
+    """Validate configuration structure.
+
+    Args:
+        config: Configuration dictionary to validate
+
+    Returns:
+        True if valid
+
+    Raises:
+        ValueError: If configuration is invalid
+    """
+    if "storage" not in config:
+        raise ValueError("Missing 'storage' section in config")
+
+    if "adapter" not in config["storage"]:
+        raise ValueError("Missing 'storage.adapter' in config")
+
+    if "config" not in config["storage"]:
+        raise ValueError("Missing 'storage.config' in config")
+
+    # Validate adapter type is known
+    valid_adapters = ["local", "redis"]  # Extend as new adapters are added
+    adapter_type = config["storage"]["adapter"]
+    if adapter_type not in valid_adapters:
+        raise ValueError(
+            f"Unknown adapter type: {adapter_type}. "
+            f"Valid options: {', '.join(valid_adapters)}"
+        )
+
+    return True
+
+
 def save_config(config: Dict[str, Any], location: str = "project") -> None:
     """Save configuration to a file.
 
@@ -90,8 +123,11 @@ def save_config(config: Dict[str, Any], location: str = "project") -> None:
         location: Where to save ("project" or "user")
 
     Raises:
-        ValueError: If location is invalid
+        ValueError: If location is invalid or config is invalid
     """
+    # Validate config before saving
+    validate_config(config)
+
     if location == "project":
         config_dir = Path(".claude")
         config_dir.mkdir(parents=True, exist_ok=True)
