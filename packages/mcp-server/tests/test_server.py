@@ -1,8 +1,9 @@
 """Tests for the MCP server tools, resources, and prompts."""
 
 import json
+
 import pytest
-from pathlib import Path
+
 from claude_session_coordinator import server
 from claude_session_coordinator.adapters import LocalFileAdapter
 
@@ -122,8 +123,8 @@ class TestDataTools:
             "current_issue": 15,
             "todos": [
                 {"task": "Task 1", "status": "completed"},
-                {"task": "Task 2", "status": "pending"}
-            ]
+                {"task": "Task 2", "status": "pending"},
+            ],
         }
 
         server.store_data("session:claude_1", "complex_data", test_data)
@@ -345,7 +346,7 @@ class TestPrompts:
         todos = [
             {"task": "Task 1", "status": "completed"},
             {"task": "Task 2", "status": "pending"},
-            {"task": "Task 3", "status": "in_progress"}
+            {"task": "Task 3", "status": "in_progress"},
         ]
         server.store_data("session:claude_1", "current_issue", 15)
         server.store_data("session:claude_1", "todos", todos)
@@ -362,7 +363,7 @@ class TestPrompts:
         # Create all completed todos
         todos = [
             {"task": "Task 1", "status": "completed"},
-            {"task": "Task 2", "status": "completed"}
+            {"task": "Task 2", "status": "completed"},
         ]
         server.store_data("session:claude_1", "current_issue", 15)
         server.store_data("session:claude_1", "todos", todos)
