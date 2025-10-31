@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/BANCS-Norway/claude_session_coordinator/tree/main/docs
+    about: Read the project documentation
+  - name: Discussions
+    url: https://github.com/BANCS-Norway/claude_session_coordinator/discussions
+    about: Ask questions and discuss ideas with the community
