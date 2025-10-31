@@ -6,8 +6,7 @@ and prompts for coordinating multiple Claude sessions across machines.
 
 import sys
 from typing import Optional, Dict, Any, List
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
+from mcp.server.fastmcp import FastMCP
 
 from .adapters import StorageAdapter, AdapterFactory, StorageError
 from .config import load_config
@@ -15,7 +14,7 @@ from .detection import detect_machine_id, detect_project_id
 
 
 # Global server state
-app = Server("claude-session-coordinator")
+app = FastMCP("claude-session-coordinator")
 storage: Optional[StorageAdapter] = None
 machine_id: str = ""
 project_id: str = ""
@@ -496,13 +495,7 @@ Call `sign_off()` to release instance {current_session['session_id']}.
 async def main() -> None:
     """Main entry point for the MCP server."""
     initialize_server()
-
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            app.create_initialization_options()
-        )
+    await app.run_stdio_async()
 
 
 if __name__ == "__main__":
