@@ -62,3 +62,6 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# Git worktrees (for developers using worktree workflow)
+.worktrees/
