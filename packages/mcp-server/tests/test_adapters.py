@@ -294,6 +294,145 @@ class TestLocalFileAdapter:
         with pytest.raises(StorageError, match="Invalid JSON"):
             adapter.retrieve(scope, "key")
 
+    def test_directory_creation_failure(self, temp_dir: Path) -> None:
+        """Test that OSError during directory creation raises StorageError."""
+        import os
+        from unittest.mock import patch
+
+        # Create a file where we want to create a directory
+        bad_path = temp_dir / "file_not_dir"
+        bad_path.write_text("I'm a file, not a directory")
+
+        # Try to create adapter with this path as base (should fail)
+        with patch("pathlib.Path.mkdir", side_effect=OSError("Permission denied")):
+            with pytest.raises(StorageError, match="Failed to create storage directory"):
+                LocalFileAdapter(base_path=str(bad_path / "subdir"))
+
+    def test_filename_to_scope_short_name(self, adapter: LocalFileAdapter) -> None:
+        """Test filename_to_scope fallback for short filenames."""
+        # Test with less than 4 parts (uses fallback logic)
+        short_filename = "one__two.json"
+        scope = adapter._filename_to_scope(short_filename)
+        assert scope == "one:two"
+
+        # Test with 2 parts
+        filename = "machine__org.json"
+        scope = adapter._filename_to_scope(filename)
+        assert scope == "machine:org"
+
+    def test_read_scope_file_os_error(
+        self, adapter: LocalFileAdapter, temp_dir: Path
+    ) -> None:
+        """Test that OSError when reading scope file raises StorageError."""
+        from unittest.mock import mock_open, patch
+
+        scope = "laptop:org/repo:session:test"
+        scope_path = adapter._get_scope_path(scope)
+
+        # Create the file first
+        adapter.store(scope, "key", "value")
+
+        # Mock open to raise OSError
+        with patch("builtins.open", side_effect=OSError("Read permission denied")):
+            with pytest.raises(StorageError, match="Failed to read scope file"):
+                adapter.retrieve(scope, "key")
+
+    def test_save_non_json_serializable_value(
+        self, adapter: LocalFileAdapter
+    ) -> None:
+        """Test that non-JSON-serializable values raise StorageError."""
+        scope = "laptop:org/repo:session:test"
+
+        # Try to store a non-serializable object (like a function)
+        class NonSerializable:
+            pass
+
+        with pytest.raises(StorageError, match="not JSON-serializable"):
+            adapter.store(scope, "key", NonSerializable())
+
+    def test_save_scope_file_os_error(
+        self, adapter: LocalFileAdapter, temp_dir: Path
+    ) -> None:
+        """Test that OSError when saving scope file raises StorageError."""
+        from unittest.mock import mock_open, patch
+
+        scope = "laptop:org/repo:session:test"
+
+        # Mock open to raise OSError on write
+        m = mock_open()
+        m.side_effect = OSError("Write permission denied")
+
+        with patch("builtins.open", m):
+            with pytest.raises(StorageError, match="Failed to write scope file"):
+                adapter.store(scope, "key", "value")
+
+    def test_delete_scope_file_os_error(
+        self, adapter: LocalFileAdapter, temp_dir: Path
+    ) -> None:
+        """Test that OSError when deleting scope file raises StorageError."""
+        from unittest.mock import patch
+
+        scope = "laptop:org/repo:session:test"
+        key = "only_key"
+
+        # Store a value
+        adapter.store(scope, key, "value")
+
+        # Mock unlink to raise OSError
+        with patch("pathlib.Path.unlink", side_effect=OSError("Delete permission denied")):
+            with pytest.raises(StorageError, match="Failed to delete scope file"):
+                adapter.delete(scope, key)
+
+    def test_delete_key_from_multi_key_scope(
+        self, adapter: LocalFileAdapter, temp_dir: Path
+    ) -> None:
+        """Test deleting one key from a scope with multiple keys."""
+        scope = "laptop:org/repo:session:test"
+
+        # Store multiple keys
+        adapter.store(scope, "key1", "value1")
+        adapter.store(scope, "key2", "value2")
+        adapter.store(scope, "key3", "value3")
+
+        # Delete one key
+        result = adapter.delete(scope, "key2")
+        assert result is True
+
+        # Verify the file still exists and other keys remain
+        scope_file = temp_dir / adapter._scope_to_filename(scope)
+        assert scope_file.exists()
+
+        assert adapter.retrieve(scope, "key1") == "value1"
+        assert adapter.retrieve(scope, "key2") is None
+        assert adapter.retrieve(scope, "key3") == "value3"
+
+    def test_list_scopes_os_error(
+        self, adapter: LocalFileAdapter, temp_dir: Path
+    ) -> None:
+        """Test that OSError when listing scopes raises StorageError."""
+        from unittest.mock import patch
+
+        # Mock glob to raise OSError
+        with patch("pathlib.Path.glob", side_effect=OSError("List permission denied")):
+            with pytest.raises(StorageError, match="Failed to list scope files"):
+                adapter.list_scopes()
+
+    def test_delete_scope_os_error(
+        self, adapter: LocalFileAdapter, temp_dir: Path
+    ) -> None:
+        """Test that OSError when deleting scope raises StorageError."""
+        from unittest.mock import patch
+
+        scope = "laptop:org/repo:session:test"
+
+        # Create the scope
+        adapter.store(scope, "key", "value")
+
+        # Mock unlink to raise OSError
+        with patch("pathlib.Path.unlink", side_effect=OSError("Delete permission denied")):
+            with pytest.raises(StorageError, match="Failed to delete scope file"):
+                adapter.delete_scope(scope)
+
 
 class TestAdapterFactory:
     """Tests for AdapterFactory."""
@@ -374,6 +513,20 @@ class TestAdapterFactory:
 
         assert isinstance(adapter, CustomAdapter)
         assert adapter.custom_param == "test_value"
+
+    def test_custom_adapter_creation_failure(self) -> None:
+        """Test that exceptions during custom adapter creation are handled."""
+
+        def failing_creator(config: Dict[str, Any]) -> StorageAdapter:
+            raise ValueError("Creation failed!")
+
+        # Register a failing adapter
+        AdapterFactory.register_adapter("failing", failing_creator)
+
+        config = {"adapter": "failing", "config": {}}
+
+        with pytest.raises(StorageError, match="Failed to create adapter"):
+            AdapterFactory.create_adapter(config)
 
 
 class TestStorageAdapterInterface:
