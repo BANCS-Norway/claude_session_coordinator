@@ -3,7 +3,7 @@
 import socket
 import subprocess
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict, cast
 
 
 def detect_machine_id(config: Dict[str, Any]) -> str:
@@ -22,7 +22,7 @@ def detect_machine_id(config: Dict[str, Any]) -> str:
         return socket.gethostname()
     else:
         # Use configured value
-        return machine_id_setting
+        return cast(str, machine_id_setting)
 
 
 def detect_project_id(config: Dict[str, Any]) -> str:
