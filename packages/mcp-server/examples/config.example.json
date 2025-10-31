@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "Configuration for Claude Session Coordinator",
+
+  "storage": {
+    "adapter": "local",
+    "config": {
+      "base_path": ".claude/session-state"
+    }
+  },
+
+  "session": {
+    "machine_id": "auto",
+    "project_detection": "git"
+  }
+}

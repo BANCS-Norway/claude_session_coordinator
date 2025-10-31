@@ -200,6 +200,14 @@ ruff check src/ tests/
 
 ## Documentation
 
+### Examples
+
+- [Basic Usage](examples/basic-usage.md) - Complete workflow guide with examples
+- [Multi-Session Coordination](examples/multi-session-coordination.md) - Advanced coordination patterns
+- [Configuration Example](examples/config.example.json) - Sample configuration file
+
+### Architecture & Design
+
 - [Architecture](../../docs/architecture/)
 - [Implementation Plan](../../docs/implementation/)
 - [Use Cases](../../docs/use-cases/)
