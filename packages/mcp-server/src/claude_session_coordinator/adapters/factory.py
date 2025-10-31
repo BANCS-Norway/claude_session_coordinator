@@ -5,13 +5,14 @@ configuration. It supports built-in adapters (local, redis) and allows users
 to register custom adapter implementations.
 """
 
-from typing import Any, Callable, Dict
+from collections.abc import Callable
+from typing import Any
 
 from .base import StorageAdapter, StorageError
 from .local import LocalFileAdapter
 
 # Type alias for adapter constructor functions
-AdapterConstructor = Callable[[Dict[str, Any]], StorageAdapter]
+AdapterConstructor = Callable[[dict[str, Any]], StorageAdapter]
 
 
 class AdapterFactory:
@@ -28,7 +29,7 @@ class AdapterFactory:
     """
 
     # Built-in adapter registry
-    _adapters: Dict[str, AdapterConstructor] = {}
+    _adapters: dict[str, AdapterConstructor] = {}
 
     @classmethod
     def register_adapter(cls, name: str, constructor: AdapterConstructor) -> None:
@@ -46,7 +47,7 @@ class AdapterFactory:
         cls._adapters[name] = constructor
 
     @classmethod
-    def create_adapter(cls, config: Dict[str, Any]) -> StorageAdapter:
+    def create_adapter(cls, config: dict[str, Any]) -> StorageAdapter:
         """Create a storage adapter from configuration.
 
         Args:
@@ -78,9 +79,7 @@ class AdapterFactory:
             try:
                 return cls._adapters[adapter_type](adapter_config)
             except Exception as e:
-                raise StorageError(
-                    f"Failed to create adapter of type '{adapter_type}': {e}"
-                ) from e
+                raise StorageError(f"Failed to create adapter of type '{adapter_type}': {e}") from e
 
         # Unknown adapter type
         raise StorageError(
@@ -90,7 +89,7 @@ class AdapterFactory:
 
 
 # Register built-in adapters
-def _create_local_adapter(config: Dict[str, Any]) -> LocalFileAdapter:
+def _create_local_adapter(config: dict[str, Any]) -> LocalFileAdapter:
     """Create a LocalFileAdapter from configuration."""
     base_path = config.get("base_path", ".claude/session-state")
     return LocalFileAdapter(base_path=base_path)

@@ -3,10 +3,10 @@
 import socket
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 
-def detect_machine_id(config: Dict[str, Any]) -> str:
+def detect_machine_id(config: dict[str, Any]) -> str:
     """Detect machine identifier.
 
     Args:
@@ -25,7 +25,7 @@ def detect_machine_id(config: Dict[str, Any]) -> str:
         return cast(str, machine_id_setting)
 
 
-def detect_project_id(config: Dict[str, Any]) -> str:
+def detect_project_id(config: dict[str, Any]) -> str:
     """Detect project identifier from git or directory.
 
     Args:
@@ -60,7 +60,7 @@ def _detect_project_from_git() -> str:
             capture_output=True,
             text=True,
             check=True,
-            timeout=5
+            timeout=5,
         )
         remote_url = result.stdout.strip()
 

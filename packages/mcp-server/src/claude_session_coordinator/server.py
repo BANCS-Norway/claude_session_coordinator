@@ -4,21 +4,20 @@ This module implements the main MCP server that provides tools, resources,
 and prompts for coordinating multiple Claude sessions across machines.
 """
 
-import sys
-from typing import Optional, Dict, Any, List
+from typing import Any
+
 from mcp.server.fastmcp import FastMCP
 
-from .adapters import StorageAdapter, AdapterFactory, StorageError
+from .adapters import AdapterFactory, StorageAdapter
 from .config import load_config
 from .detection import detect_machine_id, detect_project_id
 
-
 # Global server state
 app = FastMCP("claude-session-coordinator")
-storage: Optional[StorageAdapter] = None
+storage: StorageAdapter | None = None
 machine_id: str = ""
 project_id: str = ""
-current_session: Optional[Dict[str, str]] = None
+current_session: dict[str, str] | None = None
 
 
 def initialize_server() -> None:
@@ -38,8 +37,9 @@ def initialize_server() -> None:
 
 # Tool implementations
 
+
 @app.tool()
-def sign_on(session_id: Optional[str] = None) -> Dict[str, str]:
+def sign_on(session_id: str | None = None) -> dict[str, str]:
     """Sign on to claim an instance and establish session identity.
 
     🔹 REQUIRED FIRST STEP: Call this before any other operations.
@@ -76,10 +76,7 @@ def sign_on(session_id: Optional[str] = None) -> Dict[str, str]:
         instances = storage.retrieve(instances_scope, "registry") or {}
 
         # Find first available instance, default to claude_1 if none exist
-        session_id = next(
-            (k for k, v in instances.items() if v == "available"),
-            "claude_1"
-        )
+        session_id = next((k for k, v in instances.items() if v == "available"), "claude_1")
 
     # Mark as taken
     instances_scope = f"{machine_id}:{project_id}:instances"
@@ -92,14 +89,14 @@ def sign_on(session_id: Optional[str] = None) -> Dict[str, str]:
         "machine": machine_id,
         "project": project_id,
         "session_id": session_id,
-        "full_scope_prefix": f"{machine_id}:{project_id}"
+        "full_scope_prefix": f"{machine_id}:{project_id}",
     }
 
     return current_session
 
 
 @app.tool()
-def sign_off() -> Dict[str, Any]:
+def sign_off() -> dict[str, Any]:
     """Sign off from current session and release the instance.
 
     When done working:
@@ -207,7 +204,7 @@ def delete_data(scope: str, key: str) -> bool:
 
 
 @app.tool()
-def list_keys(scope: str) -> List[str]:
+def list_keys(scope: str) -> list[str]:
     """List all keys in a scope.
 
     Parameters:
@@ -231,7 +228,7 @@ def list_keys(scope: str) -> List[str]:
 
 
 @app.tool()
-def list_scopes(pattern: Optional[str] = None) -> List[str]:
+def list_scopes(pattern: str | None = None) -> list[str]:
     """List all scopes, optionally filtered by pattern.
 
     Scopes are automatically filtered to your machine:project context,
@@ -296,6 +293,7 @@ def delete_scope(scope: str) -> bool:
 
 # Resource implementations
 
+
 @app.resource("session://context")
 def get_session_context() -> str:
     """Provide current session context and available instances.
@@ -318,7 +316,7 @@ def get_session_context() -> str:
         "claude_1": "available",
         "claude_2": "available",
         "claude_3": "available",
-        "claude_4": "available"
+        "claude_4": "available",
     }
 
     # Find active sessions
@@ -330,12 +328,14 @@ def get_session_context() -> str:
             if keys:
                 current_issue = storage.retrieve(session_scope, "current_issue")
                 todos = storage.retrieve(session_scope, "todos") or []
-                active_sessions.append({
-                    "instance": instance_id,
-                    "status": status,
-                    "current_issue": current_issue,
-                    "todo_count": len(todos) if isinstance(todos, list) else 0
-                })
+                active_sessions.append(
+                    {
+                        "instance": instance_id,
+                        "status": status,
+                        "current_issue": current_issue,
+                        "todo_count": len(todos) if isinstance(todos, list) else 0,
+                    }
+                )
 
     context = {
         "machine": machine_id,
@@ -347,11 +347,12 @@ def get_session_context() -> str:
         "instructions": {
             "if_not_signed_on": "Call sign_on() to claim an instance",
             "if_signed_on": "Use store_data/retrieve_data to work with session state",
-            "when_done": "Call sign_off() to release your instance"
-        }
+            "when_done": "Call sign_off() to release your instance",
+        },
     }
 
     import json
+
     return json.dumps(context, indent=2)
 
 
@@ -382,14 +383,16 @@ def get_session_state(instance_id: str) -> str:
         "current_issue": storage.retrieve(session_scope, "current_issue"),
         "status": storage.retrieve(session_scope, "status"),
         "todos": storage.retrieve(session_scope, "todos"),
-        "last_updated": storage.retrieve(session_scope, "last_updated")
+        "last_updated": storage.retrieve(session_scope, "last_updated"),
     }
 
     import json
+
     return json.dumps(state, indent=2)
 
 
 # Prompt implementations
+
 
 @app.prompt()
 def startup() -> str:
@@ -406,7 +409,7 @@ def startup() -> str:
         "claude_1": "available",
         "claude_2": "available",
         "claude_3": "available",
-        "claude_4": "available"
+        "claude_4": "available",
     }
 
     first_available = next((k for k, v in instances.items() if v == "available"), None)
@@ -456,12 +459,14 @@ def sign_off_prompt() -> str:
         return "No active session to sign off from."
 
     # Get current work state
-    session_scope = f"{current_session['full_scope_prefix']}:session:{current_session['session_id']}"
+    session_scope = (
+        f"{current_session['full_scope_prefix']}:session:{current_session['session_id']}"
+    )
     current_issue = storage.retrieve(session_scope, "current_issue") if storage else None
     todos = storage.retrieve(session_scope, "todos") if storage else []
 
     if isinstance(todos, list):
-        incomplete = [t for t in todos if isinstance(t, dict) and t.get('status') != 'completed']
+        incomplete = [t for t in todos if isinstance(t, dict) and t.get("status") != "completed"]
     else:
         incomplete = []
 
@@ -492,6 +497,7 @@ Call `sign_off()` to release instance {current_session['session_id']}.
 
 # Server entry point
 
+
 async def main() -> None:
     """Main entry point for the MCP server."""
     initialize_server()
@@ -500,4 +506,5 @@ async def main() -> None:
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

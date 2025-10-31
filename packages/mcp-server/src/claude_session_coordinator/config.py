@@ -3,10 +3,10 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, cast
 
 
-def load_config() -> Dict[str, Any]:
+def load_config() -> dict[str, Any]:
     """Load configuration from file or use defaults.
 
     Priority order:
@@ -49,7 +49,7 @@ def load_config() -> Dict[str, Any]:
     return get_default_config()
 
 
-def _load_config_file(config_path: Path) -> Dict[str, Any]:
+def _load_config_file(config_path: Path) -> dict[str, Any]:
     """Load configuration from a JSON file.
 
     Args:
@@ -58,31 +58,26 @@ def _load_config_file(config_path: Path) -> Dict[str, Any]:
     Returns:
         Configuration dictionary
     """
-    with open(config_path, 'r', encoding='utf-8') as f:
-        return cast(Dict[str, Any], json.load(f))
+    with open(config_path, encoding="utf-8") as f:
+        return cast(dict[str, Any], json.load(f))
 
 
-def get_default_config() -> Dict[str, Any]:
+def get_default_config() -> dict[str, Any]:
     """Get the default configuration.
 
     Returns:
         Default configuration dictionary
     """
     return {
-        "storage": {
-            "adapter": "local",
-            "config": {
-                "base_path": ".claude/session-state"
-            }
-        },
+        "storage": {"adapter": "local", "config": {"base_path": ".claude/session-state"}},
         "session": {
             "machine_id": "auto",  # "auto" = use hostname, or specify custom value
-            "project_detection": "git"  # "git" or "directory"
-        }
+            "project_detection": "git",  # "git" or "directory"
+        },
     }
 
 
-def validate_config(config: Dict[str, Any]) -> bool:
+def validate_config(config: dict[str, Any]) -> bool:
     """Validate configuration structure.
 
     Args:
@@ -108,14 +103,13 @@ def validate_config(config: Dict[str, Any]) -> bool:
     adapter_type = config["storage"]["adapter"]
     if adapter_type not in valid_adapters:
         raise ValueError(
-            f"Unknown adapter type: {adapter_type}. "
-            f"Valid options: {', '.join(valid_adapters)}"
+            f"Unknown adapter type: {adapter_type}. " f"Valid options: {', '.join(valid_adapters)}"
         )
 
     return True
 
 
-def save_config(config: Dict[str, Any], location: str = "project") -> None:
+def save_config(config: dict[str, Any], location: str = "project") -> None:
     """Save configuration to a file.
 
     Args:
@@ -139,5 +133,5 @@ def save_config(config: Dict[str, Any], location: str = "project") -> None:
     else:
         raise ValueError(f"Invalid location: {location}. Must be 'project' or 'user'")
 
-    with open(config_file, 'w', encoding='utf-8') as f:
+    with open(config_file, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)

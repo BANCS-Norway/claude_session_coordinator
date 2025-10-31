@@ -127,4 +127,5 @@ class StorageAdapter(ABC):
 
 class StorageError(Exception):
     """Base exception for storage-related errors."""
+
     pass

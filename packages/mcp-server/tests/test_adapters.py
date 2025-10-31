@@ -3,7 +3,7 @@
 import json
 import tempfile
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -137,9 +137,7 @@ class TestLocalFileAdapter:
         result = adapter.delete(scope, "nonexistent")
         assert result is False
 
-    def test_delete_last_key_removes_file(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_delete_last_key_removes_file(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that deleting the last key in a scope removes the file."""
         scope = "laptop:org/repo:session:test"
         key = "only_key"
@@ -231,9 +229,7 @@ class TestLocalFileAdapter:
         result = adapter.delete_scope("nonexistent:scope:test:id")
         assert result is False
 
-    def test_metadata_timestamps(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_metadata_timestamps(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that metadata includes created_at and updated_at timestamps."""
         scope = "laptop:org/repo:session:test"
         key = "data"
@@ -243,7 +239,7 @@ class TestLocalFileAdapter:
 
         # Load the scope file directly to check metadata
         scope_file = temp_dir / adapter._scope_to_filename(scope)
-        with open(scope_file, "r") as f:
+        with open(scope_file) as f:
             scope_data = json.load(f)
 
         assert "metadata" in scope_data
@@ -257,7 +253,7 @@ class TestLocalFileAdapter:
         adapter.store(scope, key, "updated")
 
         # Check that updated_at changed but created_at didn't
-        with open(scope_file, "r") as f:
+        with open(scope_file) as f:
             scope_data = json.load(f)
 
         assert scope_data["metadata"][key]["created_at"] == created_at
@@ -280,9 +276,7 @@ class TestLocalFileAdapter:
         # For LocalFileAdapter, close() is a no-op, but should not raise
         adapter.close()
 
-    def test_invalid_json_raises_error(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_invalid_json_raises_error(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that corrupted JSON file raises StorageError."""
         scope = "laptop:org/repo:session:test"
         scope_file = temp_dir / adapter._scope_to_filename(scope)
@@ -296,7 +290,6 @@ class TestLocalFileAdapter:
 
     def test_directory_creation_failure(self, temp_dir: Path) -> None:
         """Test that OSError during directory creation raises StorageError."""
-        import os
         from unittest.mock import patch
 
         # Create a file where we want to create a directory
@@ -320,14 +313,11 @@ class TestLocalFileAdapter:
         scope = adapter._filename_to_scope(filename)
         assert scope == "machine:org"
 
-    def test_read_scope_file_os_error(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_read_scope_file_os_error(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that OSError when reading scope file raises StorageError."""
-        from unittest.mock import mock_open, patch
+        from unittest.mock import patch
 
         scope = "laptop:org/repo:session:test"
-        scope_path = adapter._get_scope_path(scope)
 
         # Create the file first
         adapter.store(scope, "key", "value")
@@ -337,9 +327,7 @@ class TestLocalFileAdapter:
             with pytest.raises(StorageError, match="Failed to read scope file"):
                 adapter.retrieve(scope, "key")
 
-    def test_save_non_json_serializable_value(
-        self, adapter: LocalFileAdapter
-    ) -> None:
+    def test_save_non_json_serializable_value(self, adapter: LocalFileAdapter) -> None:
         """Test that non-JSON-serializable values raise StorageError."""
         scope = "laptop:org/repo:session:test"
 
@@ -350,9 +338,7 @@ class TestLocalFileAdapter:
         with pytest.raises(StorageError, match="not JSON-serializable"):
             adapter.store(scope, "key", NonSerializable())
 
-    def test_save_scope_file_os_error(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_save_scope_file_os_error(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that OSError when saving scope file raises StorageError."""
         from unittest.mock import mock_open, patch
 
@@ -366,9 +352,7 @@ class TestLocalFileAdapter:
             with pytest.raises(StorageError, match="Failed to write scope file"):
                 adapter.store(scope, "key", "value")
 
-    def test_delete_scope_file_os_error(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_delete_scope_file_os_error(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that OSError when deleting scope file raises StorageError."""
         from unittest.mock import patch
 
@@ -406,9 +390,7 @@ class TestLocalFileAdapter:
         assert adapter.retrieve(scope, "key2") is None
         assert adapter.retrieve(scope, "key3") == "value3"
 
-    def test_list_scopes_os_error(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_list_scopes_os_error(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that OSError when listing scopes raises StorageError."""
         from unittest.mock import patch
 
@@ -417,9 +399,7 @@ class TestLocalFileAdapter:
             with pytest.raises(StorageError, match="Failed to list scope files"):
                 adapter.list_scopes()
 
-    def test_delete_scope_os_error(
-        self, adapter: LocalFileAdapter, temp_dir: Path
-    ) -> None:
+    def test_delete_scope_os_error(self, adapter: LocalFileAdapter, temp_dir: Path) -> None:
         """Test that OSError when deleting scope raises StorageError."""
         from unittest.mock import patch
 
@@ -501,7 +481,7 @@ class TestAdapterFactory:
             def close(self) -> None:
                 pass
 
-        def create_custom(config: Dict[str, Any]) -> CustomAdapter:
+        def create_custom(config: dict[str, Any]) -> CustomAdapter:
             return CustomAdapter(custom_param=config.get("custom_param", "default"))
 
         # Register the custom adapter
@@ -517,7 +497,7 @@ class TestAdapterFactory:
     def test_custom_adapter_creation_failure(self) -> None:
         """Test that exceptions during custom adapter creation are handled."""
 
-        def failing_creator(config: Dict[str, Any]) -> StorageAdapter:
+        def failing_creator(config: dict[str, Any]) -> StorageAdapter:
             raise ValueError("Creation failed!")
 
         # Register a failing adapter

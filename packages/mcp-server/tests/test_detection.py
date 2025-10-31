@@ -1,10 +1,9 @@
 """Comprehensive tests for configuration and detection modules."""
 
 import json
-import os
 import tempfile
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -142,9 +141,7 @@ class TestConfigLoading:
         claude_dir = temp_dir / ".claude"
         claude_dir.mkdir()
         project_config = claude_dir / "session-coordinator-config.json"
-        project_config.write_text(
-            json.dumps({"session": {"machine_id": "project-machine"}})
-        )
+        project_config.write_text(json.dumps({"session": {"machine_id": "project-machine"}}))
 
         # Create env var config
         env_config_file = temp_dir / "env-config.json"
@@ -173,9 +170,7 @@ class TestConfigLoading:
         claude_dir = temp_dir / ".claude"
         claude_dir.mkdir()
         project_config = claude_dir / "session-coordinator-config.json"
-        project_config.write_text(
-            json.dumps({"session": {"machine_id": "project-machine"}})
-        )
+        project_config.write_text(json.dumps({"session": {"machine_id": "project-machine"}}))
 
         config = load_config()
 
@@ -236,7 +231,7 @@ class TestConfigLoading:
 
     def test_validate_config_missing_storage(self) -> None:
         """Test that validate_config rejects config without storage section."""
-        config: Dict[str, Any] = {"session": {}}
+        config: dict[str, Any] = {"session": {}}
         with pytest.raises(ValueError, match="Missing 'storage' section"):
             validate_config(config)
 
@@ -254,12 +249,7 @@ class TestConfigLoading:
 
     def test_validate_config_invalid_adapter_type(self) -> None:
         """Test that validate_config rejects unknown adapter types."""
-        config = {
-            "storage": {
-                "adapter": "unknown_adapter",
-                "config": {}
-            }
-        }
+        config = {"storage": {"adapter": "unknown_adapter", "config": {}}}
         with pytest.raises(ValueError, match="Unknown adapter type"):
             validate_config(config)
 
@@ -269,7 +259,7 @@ class TestConfigLoading:
         """Test that save_config validates configuration before saving."""
         monkeypatch.chdir(temp_dir)
 
-        invalid_config: Dict[str, Any] = {"invalid": "config"}
+        invalid_config: dict[str, Any] = {"invalid": "config"}
 
         with pytest.raises(ValueError, match="Missing 'storage' section"):
             save_config(invalid_config, location="project")
@@ -299,7 +289,7 @@ class TestMachineDetection:
 
     def test_detect_machine_id_missing_config_defaults_to_auto(self) -> None:
         """Test that missing machine_id config defaults to auto detection."""
-        config: Dict[str, Any] = {}
+        config: dict[str, Any] = {}
 
         with patch("claude_session_coordinator.detection.socket.gethostname") as mock_hostname:
             mock_hostname.return_value = "default-machine"
@@ -361,11 +351,10 @@ class TestProjectDetection:
         """Test that git detection falls back to directory name on failure."""
         config = {"session": {"project_detection": "git"}}
 
-        with patch(
-            "claude_session_coordinator.detection.subprocess.run"
-        ) as mock_run, patch(
-            "claude_session_coordinator.detection.Path.cwd"
-        ) as mock_cwd:
+        with (
+            patch("claude_session_coordinator.detection.subprocess.run") as mock_run,
+            patch("claude_session_coordinator.detection.Path.cwd") as mock_cwd,
+        ):
             # Simulate git command failure
             from subprocess import CalledProcessError
 
@@ -380,11 +369,10 @@ class TestProjectDetection:
         """Test that git timeout falls back to directory name."""
         config = {"session": {"project_detection": "git"}}
 
-        with patch(
-            "claude_session_coordinator.detection.subprocess.run"
-        ) as mock_run, patch(
-            "claude_session_coordinator.detection.Path.cwd"
-        ) as mock_cwd:
+        with (
+            patch("claude_session_coordinator.detection.subprocess.run") as mock_run,
+            patch("claude_session_coordinator.detection.Path.cwd") as mock_cwd,
+        ):
             # Simulate git command timeout
             from subprocess import TimeoutExpired
 
@@ -414,7 +402,7 @@ class TestProjectDetection:
 
     def test_detect_project_missing_config_defaults_to_git(self) -> None:
         """Test that missing project_detection defaults to git method."""
-        config: Dict[str, Any] = {}
+        config: dict[str, Any] = {}
         git_output = "git@github.com:owner/repo.git\n"
 
         with patch("claude_session_coordinator.detection.subprocess.run") as mock_run:
@@ -428,11 +416,10 @@ class TestProjectDetection:
         config = {"session": {"project_detection": "git"}}
         git_output = "weird://format/url\n"
 
-        with patch(
-            "claude_session_coordinator.detection.subprocess.run"
-        ) as mock_run, patch(
-            "claude_session_coordinator.detection.Path.cwd"
-        ) as mock_cwd:
+        with (
+            patch("claude_session_coordinator.detection.subprocess.run") as mock_run,
+            patch("claude_session_coordinator.detection.Path.cwd") as mock_cwd,
+        ):
             mock_run.return_value.stdout = git_output
             mock_cwd.return_value = Path("/fallback/project-name")
 
@@ -454,9 +441,10 @@ class TestConfigDetectionIntegration:
         """Test complete workflow using default configuration."""
         config = load_config()
 
-        with patch("claude_session_coordinator.detection.socket.gethostname") as mock_hostname, patch(
-            "claude_session_coordinator.detection.subprocess.run"
-        ) as mock_git:
+        with (
+            patch("claude_session_coordinator.detection.socket.gethostname") as mock_hostname,
+            patch("claude_session_coordinator.detection.subprocess.run") as mock_git,
+        ):
             mock_hostname.return_value = "my-laptop"
             mock_git.return_value.stdout = "git@github.com:org/repo.git\n"
 
@@ -466,7 +454,9 @@ class TestConfigDetectionIntegration:
         assert machine_id == "my-laptop"
         assert project_id == "org/repo"
 
-    def test_full_workflow_with_custom_config(self, temp_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_full_workflow_with_custom_config(
+        self, temp_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test complete workflow with custom configuration."""
         monkeypatch.chdir(temp_dir)
 

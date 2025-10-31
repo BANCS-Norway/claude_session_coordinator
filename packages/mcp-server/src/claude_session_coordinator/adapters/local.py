@@ -5,7 +5,6 @@ is stored as a separate JSON file in the configured directory (default: .claude/
 """
 
 import json
-import os
 from datetime import datetime
 from fnmatch import fnmatch
 from pathlib import Path
@@ -111,7 +110,7 @@ class LocalFileAdapter(StorageAdapter):
             return {}
 
         try:
-            with open(scope_path, "r", encoding="utf-8") as f:
+            with open(scope_path, encoding="utf-8") as f:
                 data = json.load(f)
                 return cast(dict[str, Any], data)
         except json.JSONDecodeError as e:

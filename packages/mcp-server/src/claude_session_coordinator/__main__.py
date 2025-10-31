@@ -6,10 +6,9 @@ Run with: python -m claude_session_coordinator
 import argparse
 import asyncio
 import sys
-from typing import Optional
 
 from . import __version__
-from .config import load_config, get_default_config
+from .config import get_default_config, load_config
 from .server import main
 
 
@@ -36,27 +35,21 @@ Examples:
 
 For more information, visit:
   https://github.com/BANCS-Norway/claude_session_coordinator
-        """
+        """,
     )
 
     parser.add_argument(
         "--version",
         action="version",
         version=f"%(prog)s {__version__}",
-        help="show version and exit"
+        help="show version and exit",
     )
 
     parser.add_argument(
-        "--validate-config",
-        action="store_true",
-        help="validate configuration and exit"
+        "--validate-config", action="store_true", help="validate configuration and exit"
     )
 
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="enable verbose logging"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="enable verbose logging")
 
     return parser
 
@@ -122,6 +115,7 @@ def validate_config() -> int:
         print("\nUsing default configuration:")
         default_config = get_default_config()
         import json
+
         print(json.dumps(default_config, indent=2))
         print("\n✓ Default configuration is valid")
         return 0
@@ -153,11 +147,12 @@ def run_server(verbose: bool = False) -> int:
         print(f"Error: {e}", file=sys.stderr)
         if verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
 
-def cli_main(argv: Optional[list[str]] = None) -> int:
+def cli_main(argv: list[str] | None = None) -> int:
     """Main CLI entry point.
 
     Args:

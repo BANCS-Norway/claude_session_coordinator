@@ -1,11 +1,13 @@
 """Tests for the CLI entry point."""
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from claude_session_coordinator.__main__ import (
+    cli_main,
     create_parser,
     validate_config,
-    cli_main,
 )
 
 
@@ -67,10 +69,7 @@ class TestValidateConfig:
         from claude_session_coordinator.config import get_default_config
 
         mock_config = get_default_config()
-        monkeypatch.setattr(
-            "claude_session_coordinator.__main__.load_config",
-            lambda: mock_config
-        )
+        monkeypatch.setattr("claude_session_coordinator.__main__.load_config", lambda: mock_config)
 
         # Should succeed with default config
         result = validate_config()
@@ -80,10 +79,7 @@ class TestValidateConfig:
         """Test validation fails with missing storage section."""
         # Mock load_config to return invalid config
         mock_config = {"session": {}}
-        monkeypatch.setattr(
-            "claude_session_coordinator.__main__.load_config",
-            lambda: mock_config
-        )
+        monkeypatch.setattr("claude_session_coordinator.__main__.load_config", lambda: mock_config)
 
         result = validate_config()
         assert result == 1
@@ -91,23 +87,18 @@ class TestValidateConfig:
     def test_validate_config_missing_adapter(self, monkeypatch):
         """Test validation fails with missing adapter specification."""
         mock_config = {"storage": {}}
-        monkeypatch.setattr(
-            "claude_session_coordinator.__main__.load_config",
-            lambda: mock_config
-        )
+        monkeypatch.setattr("claude_session_coordinator.__main__.load_config", lambda: mock_config)
 
         result = validate_config()
         assert result == 1
 
     def test_validate_config_file_not_found(self, monkeypatch):
         """Test validation handles missing config file gracefully."""
+
         def raise_not_found():
             raise FileNotFoundError("Config not found")
 
-        monkeypatch.setattr(
-            "claude_session_coordinator.__main__.load_config",
-            raise_not_found
-        )
+        monkeypatch.setattr("claude_session_coordinator.__main__.load_config", raise_not_found)
 
         # Should return 0 (uses defaults) when config file not found
         result = validate_config()
@@ -118,15 +109,9 @@ class TestValidateConfig:
         from claude_session_coordinator.config import get_default_config
 
         mock_config = get_default_config()
-        mock_config["session"] = {
-            "machine_id": "test-machine",
-            "project_detection": "directory"
-        }
+        mock_config["session"] = {"machine_id": "test-machine", "project_detection": "directory"}
 
-        monkeypatch.setattr(
-            "claude_session_coordinator.__main__.load_config",
-            lambda: mock_config
-        )
+        monkeypatch.setattr("claude_session_coordinator.__main__.load_config", lambda: mock_config)
 
         result = validate_config()
         assert result == 0
@@ -138,10 +123,7 @@ class TestCLIMain:
     def test_cli_main_validate_config(self, monkeypatch):
         """Test CLI with --validate-config argument."""
         # Mock validate_config to return success
-        monkeypatch.setattr(
-            "claude_session_coordinator.__main__.validate_config",
-            lambda: 0
-        )
+        monkeypatch.setattr("claude_session_coordinator.__main__.validate_config", lambda: 0)
 
         result = cli_main(["--validate-config"])
         assert result == 0
