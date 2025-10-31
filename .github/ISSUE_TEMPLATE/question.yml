@@ -1,0 +1,48 @@
+name: Question
+description: Ask a question about usage or configuration
+title: "[Question]: "
+labels: ["question", "status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help! Please provide details below.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Ask your question here...
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What Have You Tried?
+      description: Have you attempted any solutions or workarounds?
+      placeholder: |
+        - Checked the documentation at...
+        - Tried configuring...
+        - Searched for...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide context about what you're trying to accomplish
+      placeholder: |
+        I'm trying to...
+        My setup includes...
+        My goal is to...
+
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Related Documentation
+      description: Have you checked the documentation? If so, what did you review?
+      placeholder: |
+        - README.md
+        - CONTRIBUTING.md
+        - docs/architecture/overview.md

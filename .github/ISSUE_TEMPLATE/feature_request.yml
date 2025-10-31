@@ -1,0 +1,56 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["type: feature", "status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please provide as much detail as possible to help us understand your idea.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Use Case
+      description: Describe the problem this feature would solve or the use case it addresses
+      placeholder: |
+        I'm always frustrated when...
+        I need to be able to...
+        It would be helpful if...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe how you envision this feature working
+      placeholder: Describe your proposed solution...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: Describe any alternatives you've considered...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that might be helpful (mockups, examples, references)
+      placeholder: Add any additional context here...
+
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Willing to Contribute?
+      description: Would you be interested in contributing this feature?
+      options:
+        - "Yes, I'd like to implement this"
+        - "Maybe, with guidance"
+        - "No, just suggesting"
+    validations:
+      required: true
