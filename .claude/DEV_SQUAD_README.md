@@ -289,30 +289,69 @@ console.log(`Available sessions: ${Object.keys(registry.sessions)}`);
 - Performance highlights
 - Basic coordination examples
 
-## Private Alternative: Clone Force 99
+## File Usage: Template vs Working Copy
 
-For personal/internal use, you can maintain a Star Wars-themed version:
+**🚨 CRITICAL: Understand which file to update!**
 
-**Private (local only - NOT committed to git):**
-- `.claude/CLONES.md` - Clone Force 99 version
-- Uses character names: Hunter, Tech, Wrecker, Crosshair, Echo, Omega, Rex
-- Add to `.gitignore` to keep it local
+This section clarifies the separation between tracked template and local working copy.
 
-**Configuration:**
-```json
-{
-  "session_registry": {
-    "file": ".claude/CLONES.md",  // or DEV-SQUAD.md
-    "format": "v1.1.0"
-  }
-}
+### DEV-SQUAD.md (Tracked Template)
+
+- **Location:** `.claude/DEV-SQUAD.md`
+- **Git Status:** Committed and tracked in repository
+- **Purpose:** Reference template for new clones/contributors
+- **Updates:** Only update for structural changes, new agents, or documentation improvements
+- **Session State:** ❌ **NEVER update for session state changes**
+- **Contains:** Static documentation, agent roster, coordination protocols
+
+### CLONES.md (Working Copy)
+
+- **Location:** `.claude/CLONES.md`
+- **Git Status:** Local only (not tracked, effectively gitignored)
+- **Purpose:** Active session coordination and real-time state tracking
+- **Updates:** ✅ **ALWAYS update for session state changes**
+- **Session State:** This is where sign-on/sign-off and progress updates go
+- **Contains:** Real-time session status, active tasks, current progress
+
+### First-Time Setup
+
+**For new clones of the repository:**
+
+When you clone the repository for the first time, create your working copy:
+
+```bash
+# Check if CLONES.md exists
+if [ ! -f .claude/CLONES.md ]; then
+  # First-time setup: Copy template to working copy
+  cp .claude/DEV-SQUAD.md .claude/CLONES.md
+  echo "✓ Created .claude/CLONES.md from template"
+fi
 ```
 
-**Why keep both?**
-- Fun personality-driven names for personal use
-- IP-safe names for public/open source
-- Same technical functionality
-- User preference
+**For Claude Code sessions:**
+
+Before updating session state, check for CLONES.md:
+
+1. Check if `.claude/CLONES.md` exists
+2. If not found → copy `.claude/DEV-SQUAD.md` to `.claude/CLONES.md` (first-time setup)
+3. ✅ **Always read/write session state to `.claude/CLONES.md`**
+4. ❌ **Never modify `.claude/DEV-SQUAD.md` for session state**
+
+### Why Separate Files?
+
+- **DEV-SQUAD.md:** Clean template for new contributors, no git noise from session updates
+- **CLONES.md:** Local working copy with your real-time session state updates
+- **Same format:** Both use v1.1.0 structure with YAML frontmatter
+- **Optional customization:** Use Star Wars names (Clone Force 99) in CLONES.md if desired
+
+### Temporary Solution (Phase 1)
+
+**This manual file separation is temporary.**
+
+- **Phase 1 (Current):** Manual updates to CLONES.md by Claude sessions
+- **Phase 3 (Future):** Automatic updates via MCP server tools
+
+Once we reach Phase 3 (Advanced Features), the MCP server will automatically handle session state updates through the `sign_on()` and `sign_off()` tools, making manual file updates obsolete. This documentation clarifies the interim workflow until automation is implemented.
 
 ## Best Practices
 
