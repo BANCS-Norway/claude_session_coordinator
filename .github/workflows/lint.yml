@@ -1,0 +1,142 @@
+name: Lint
+
+# Monorepo-wide linting with path-based matrix
+# Only runs jobs for packages that were modified in the PR
+# Efficient, scalable, and future-proof
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # Detect which packages have changes
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      mcp-server: ${{ steps.filter.outputs.mcp-server }}
+      homepage: ${{ steps.filter.outputs.homepage }}
+      docs: ${{ steps.filter.outputs.docs }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            mcp-server:
+              - 'packages/mcp-server/**'
+            homepage:
+              - 'packages/homepage/**'
+            docs:
+              - 'docs/**'
+              - '*.md'
+            workflows:
+              - '.github/workflows/**'
+
+  # Python linting (MCP Server package)
+  lint-mcp-server:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mcp-server == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd packages/mcp-server
+          pip install -e ".[dev]"
+
+      - name: Run Black
+        run: |
+          cd packages/mcp-server
+          black --check src/ tests/
+
+      - name: Run Ruff
+        run: |
+          cd packages/mcp-server
+          ruff check src/ tests/
+
+      - name: Run Mypy
+        run: |
+          cd packages/mcp-server
+          mypy src/
+
+  # TypeScript/JavaScript linting (Homepage package - future)
+  # Uncomment when homepage package is created
+  #
+  # lint-homepage:
+  #   needs: detect-changes
+  #   if: needs.detect-changes.outputs.homepage == 'true'
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #
+  #     - name: Install dependencies
+  #       run: |
+  #         cd packages/homepage
+  #         npm ci
+  #
+  #     - name: Run ESLint
+  #       run: |
+  #         cd packages/homepage
+  #         npm run lint
+
+  # Markdown linting (documentation)
+  lint-markdown:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --ignore node_modules --ignore .worktrees
+
+  # YAML linting (GitHub workflows, configs)
+  lint-yaml:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.workflows == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: yamllint .github/workflows/

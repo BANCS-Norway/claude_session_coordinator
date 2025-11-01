@@ -1,21 +1,92 @@
 # Lefthook configuration for claude_session_coordinator
 # See https://github.com/evilmartians/lefthook for more information
+#
+# Monorepo-wide linting configuration
+# - Covers all packages and file types
+# - Language-agnostic approach
+# - Future-proof for new packages
 
 pre-commit:
   parallel: true
   commands:
+    # ============================================================
+    # Python linting (MCP Server package)
+    # ============================================================
+
     # Black - Code formatter
-    black:
+    python-black:
       glob: "packages/mcp-server/**/*.py"
       run: black --check --config packages/mcp-server/pyproject.toml {staged_files}
 
     # Ruff - Fast Python linter
-    ruff:
+    python-ruff:
       root: "packages/mcp-server/"
       glob: "**/*.py"
       run: ruff check src/ tests/
 
     # Mypy - Static type checker
-    mypy:
+    python-mypy:
       glob: "packages/mcp-server/src/**/*.py"
       run: mypy --config-file packages/mcp-server/pyproject.toml {staged_files}
+
+    # ============================================================
+    # JavaScript/TypeScript linting (Homepage package - future)
+    # ============================================================
+    #
+    # Note: Uncomment when homepage package is created
+    #
+    # homepage-lint:
+    #   glob: "packages/homepage/**/*.{js,ts,jsx,tsx}"
+    #   run: npm run lint --prefix packages/homepage
+    #   skip:
+    #     - merge
+    #     - rebase
+
+    # ============================================================
+    # Monorepo-wide file linting (all packages)
+    # ============================================================
+
+    # Markdown linting (documentation, READMEs)
+    markdown-lint:
+      glob: "**/*.md"
+      exclude: "node_modules|.worktrees|.git"
+      run: |
+        # Check if markdownlint-cli is installed
+        if ! command -v markdownlint &> /dev/null; then
+          echo "⚠️  markdownlint-cli not installed. Skipping markdown linting."
+          echo "Install with: npm install -g markdownlint-cli"
+          exit 0
+        fi
+        markdownlint {staged_files}
+      skip:
+        - merge
+        - rebase
+
+    # YAML linting (configs, GitHub workflows)
+    yaml-lint:
+      glob: "**/*.{yml,yaml}"
+      exclude: "node_modules|.worktrees|.git"
+      run: |
+        # Check if yamllint is installed
+        if ! command -v yamllint &> /dev/null; then
+          echo "⚠️  yamllint not installed. Skipping YAML linting."
+          echo "Install with: pip install yamllint"
+          exit 0
+        fi
+        yamllint {staged_files}
+      skip:
+        - merge
+        - rebase
+
+    # JSON linting (package.json, tsconfig.json, etc.)
+    json-lint:
+      glob: "**/*.json"
+      exclude: "node_modules|.worktrees|.git|package-lock.json"
+      run: |
+        # Use Python's json.tool for validation (always available)
+        for file in {staged_files}; do
+          python3 -m json.tool "$file" > /dev/null || exit 1
+        done
+      skip:
+        - merge
+        - rebase

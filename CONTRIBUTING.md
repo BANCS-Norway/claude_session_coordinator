@@ -365,13 +365,32 @@ This repository uses [Lefthook](https://github.com/evilmartians/lefthook) for au
 
 #### What Happens on Commit
 
-When you commit Python files in `packages/mcp-server/`, Lefthook automatically runs:
+Lefthook automatically runs **language-appropriate linters** based on the files you're committing:
 
+**For Python files** (`packages/mcp-server/**/*.py`):
 1. **Black** - Code formatter (checks formatting)
 2. **Ruff** - Fast Python linter (checks code quality)
 3. **Mypy** - Type checker (validates type hints)
 
+**For Markdown files** (`**/*.md`):
+- **markdownlint** - Markdown linting (if installed globally)
+
+**For YAML files** (`**/*.yml`, `**/*.yaml`):
+- **yamllint** - YAML linting (if installed globally)
+
+**For JSON files** (`**/*.json`):
+- **Python json.tool** - JSON syntax validation (always available)
+
 If any check fails, the commit is blocked until you fix the issues.
+
+**Note:** Markdown and YAML linters are optional. If not installed, Lefthook will warn but allow the commit. Install them for full linting coverage:
+```bash
+# Markdown linting
+npm install -g markdownlint-cli
+
+# YAML linting
+pip install yamllint
+```
 
 #### Running Linters Manually
 
