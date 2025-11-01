@@ -1,0 +1,45 @@
+name: Lint MCP Server
+
+on:
+  pull_request:
+    paths:
+      - 'packages/mcp-server/**'
+      - '.github/workflows/lint-mcp-server.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/mcp-server/**'
+      - '.github/workflows/lint-mcp-server.yml'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd packages/mcp-server
+          pip install -e ".[dev]"
+
+      - name: Run Black
+        run: |
+          cd packages/mcp-server
+          black --check src/ tests/
+
+      - name: Run Ruff
+        run: |
+          cd packages/mcp-server
+          ruff check src/ tests/
+
+      - name: Run Mypy
+        run: |
+          cd packages/mcp-server
+          mypy src/

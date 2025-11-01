@@ -1,0 +1,29 @@
+{
+  "name": "claude-session-coordinator",
+  "version": "0.1.0",
+  "description": "MCP server for coordinating multiple Claude AI sessions",
+  "private": true,
+  "scripts": {
+    "postinstall": "lefthook install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BANCS-Norway/claude_session_coordinator.git"
+  },
+  "keywords": [
+    "claude",
+    "mcp",
+    "coordination",
+    "ai",
+    "assistant"
+  ],
+  "author": "BANCS AS <contact@bancs.no>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BANCS-Norway/claude_session_coordinator/issues"
+  },
+  "homepage": "https://github.com/BANCS-Norway/claude_session_coordinator#readme",
+  "devDependencies": {
+    "lefthook": "^1.10.1"
+  }
+}

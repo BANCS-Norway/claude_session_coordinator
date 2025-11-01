@@ -30,7 +30,31 @@ This is a monorepo containing:
 
 ## Quick Start
 
-### Installation (Phase 1 - Development)
+### For Contributors/Development
+
+**Prerequisites:**
+- Python 3.10+
+- Node.js 18+
+- npm (comes with Node.js)
+
+**Setup:**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/BANCS-Norway/claude_session_coordinator.git
+cd claude_session_coordinator
+
+# 2. Install git hooks (automatic linting on commit)
+npm install
+
+# 3. Install Python MCP server package
+cd packages/mcp-server
+pip install -e ".[dev]"
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
+
+### For Users (Phase 1 - Development)
 
 ```bash
 cd packages/mcp-server
