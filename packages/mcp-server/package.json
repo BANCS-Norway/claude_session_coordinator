@@ -1,0 +1,12 @@
+{
+  "name": "@claude-session-coordinator/mcp-server",
+  "version": "0.1.0",
+  "description": "Python MCP server for coordinating multiple Claude AI sessions",
+  "scripts": {
+    "lint": "npm run lint:black && npm run lint:ruff && npm run lint:mypy",
+    "lint:black": "black --check --config pyproject.toml .",
+    "lint:ruff": "ruff check --config pyproject.toml .",
+    "lint:mypy": "mypy --config-file pyproject.toml src/",
+    "lint:fix": "black --config pyproject.toml . && ruff check --fix --config pyproject.toml ."
+  }
+}

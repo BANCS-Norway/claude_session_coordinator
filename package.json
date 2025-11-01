@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "description": "MCP server for coordinating multiple Claude AI sessions",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "postinstall": "lefthook install"
+    "postinstall": "lefthook install",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present"
   },
   "repository": {
     "type": "git",
