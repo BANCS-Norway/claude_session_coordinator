@@ -17,7 +17,9 @@ Thank you for your interest in contributing to Claude Session Coordinator! This 
 
 ### Prerequisites
 
-- **Python:** 3.9 or higher
+- **Python:** 3.10 or higher
+- **Node.js:** 18.0 or higher (for git hooks via Lefthook)
+- **npm:** Node.js package manager (comes with Node.js)
 - **Git:** Latest stable version
 - **pip:** Python package installer
 - **GitHub CLI (gh):** Optional but recommended for issue and PR management
@@ -37,13 +39,23 @@ Thank you for your interest in contributing to Claude Session Coordinator! This 
 
 ### Development Environment Setup
 
-1. Create a virtual environment:
+1. Install git hooks (Lefthook):
+   ```bash
+   npm install
+   ```
+
+   This will automatically:
+   - Install Lefthook locally
+   - Set up git hooks for automatic linting
+   - Configure pre-commit checks (Black, Ruff, Mypy)
+
+2. Create a virtual environment:
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-2. Install the package in development mode:
+3. Install the package in development mode:
    ```bash
    cd packages/mcp-server
    pip install -e .
@@ -275,11 +287,12 @@ virtual environment setup.
 
 ### Before Submitting
 
-1. Ensure all tests pass
-2. Update documentation
-3. Rebase on latest main
-4. Verify commit messages follow conventions
-5. Check that your branch is up-to-date with main
+1. Ensure all tests pass: `pytest`
+2. Verify linting passes (hooks run automatically on commit, but you can check manually)
+3. Update documentation if needed
+4. Rebase on latest main
+5. Verify commit messages follow conventions
+6. Check that your branch is up-to-date with main
 
 ### PR Title Format
 
@@ -344,49 +357,91 @@ pytest tests/test_storage.py
 pytest -k "test_sign_on"
 ```
 
-### Type Checking
+### Git Hooks (Lefthook)
+
+This repository uses [Lefthook](https://github.com/evilmartians/lefthook) for automatic code quality checks.
+
+**Hooks are automatically installed when you run `npm install`.**
+
+#### What Happens on Commit
+
+When you commit Python files in `packages/mcp-server/`, Lefthook automatically runs:
+
+1. **Black** - Code formatter (checks formatting)
+2. **Ruff** - Fast Python linter (checks code quality)
+3. **Mypy** - Type checker (validates type hints)
+
+If any check fails, the commit is blocked until you fix the issues.
+
+#### Running Linters Manually
 
 ```bash
-# Run mypy type checker
-mypy packages/mcp-server/claude_session_coordinator
+# Check formatting with Black
+cd packages/mcp-server
+black --check src/ tests/
+
+# Auto-format with Black
+black src/ tests/
+
+# Run Ruff linter
+ruff check src/ tests/
+
+# Auto-fix Ruff issues
+ruff check --fix src/ tests/
+
+# Run Mypy type checker
+mypy src/
 ```
 
-### Linting
+#### Skipping Hooks (Emergency Use Only)
+
+If you need to skip hooks (not recommended):
 
 ```bash
-# Run flake8
-flake8 packages/mcp-server/claude_session_coordinator
+# Skip all git hooks
+git commit --no-verify -m "message"
 
-# Run pylint
-pylint packages/mcp-server/claude_session_coordinator
+# Or temporarily disable Lefthook
+LEFTHOOK=0 git commit -m "message"
 ```
 
-### Code Formatting
+**Note:** Even if you skip hooks locally, CI/CD will still enforce these checks on your PR.
 
+#### Troubleshooting
+
+**Hooks not running?**
 ```bash
-# Format code with Black
-black packages/mcp-server/claude_session_coordinator
+# Reinstall hooks
+npm install
 
-# Check formatting without making changes
-black --check packages/mcp-server/claude_session_coordinator
+# Or manually install
+npx lefthook install
+```
 
-# Sort imports with isort
-isort packages/mcp-server/claude_session_coordinator
+**Linters not found?**
+```bash
+# Make sure development dependencies are installed
+cd packages/mcp-server
+pip install -e ".[dev]"
 ```
 
 ### Development Workflow Summary
 
 ```bash
-# Before committing
-black .
-isort .
-flake8 .
-mypy .
-pytest
+# Initial setup (once)
+npm install  # Installs Lefthook hooks automatically
+
+# Development workflow
+pytest  # Run tests
 
 # Commit your changes
 git add <files>
 git commit -m "feat(scope): description"
+
+# Hooks run automatically on commit:
+# ✓ Black checks formatting
+# ✓ Ruff checks code quality
+# ✓ Mypy validates types
 ```
 
 ## Issue Guidelines

@@ -1,0 +1,20 @@
+# Lefthook configuration for claude_session_coordinator
+# See https://github.com/evilmartians/lefthook for more information
+
+pre-commit:
+  parallel: true
+  commands:
+    # Black - Code formatter
+    black:
+      glob: "packages/mcp-server/**/*.py"
+      run: black --check --config packages/mcp-server/pyproject.toml {staged_files}
+
+    # Ruff - Fast Python linter
+    ruff:
+      glob: "packages/mcp-server/**/*.py"
+      run: ruff check --config packages/mcp-server/pyproject.toml {staged_files}
+
+    # Mypy - Static type checker
+    mypy:
+      glob: "packages/mcp-server/src/**/*.py"
+      run: mypy --config-file packages/mcp-server/pyproject.toml {staged_files}
