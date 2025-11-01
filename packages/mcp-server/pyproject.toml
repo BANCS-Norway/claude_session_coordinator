@@ -39,6 +39,9 @@ redis = [
     "redis>=5.0.0",
 ]
 
+[project.scripts]
+claude-session-coordinator = "claude_session_coordinator.__main__:cli_main"
+
 [project.urls]
 Homepage = "https://github.com/BANCS-Norway/claude_session_coordinator"
 Documentation = "https://csc.bancs.no"
