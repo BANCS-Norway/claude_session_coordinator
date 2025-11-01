@@ -11,6 +11,7 @@ from mcp.server.fastmcp import FastMCP
 from .adapters import AdapterFactory, StorageAdapter
 from .config import load_config
 from .detection import detect_machine_id, detect_project_id
+from .settings import Settings, get_adapter_info, get_scope_description, recommend_adapter
 
 # Global server state
 app = FastMCP("claude-session-coordinator")
@@ -18,6 +19,7 @@ storage: StorageAdapter | None = None
 machine_id: str = ""
 project_id: str = ""
 current_session: dict[str, str] | None = None
+settings_manager: Settings = Settings()
 
 
 def initialize_server() -> None:
@@ -291,6 +293,95 @@ def delete_scope(scope: str) -> bool:
     return storage.delete_scope(full_scope)
 
 
+@app.tool()
+def update_storage_settings(
+    adapter: str,
+    scope: str,
+    reason: str,
+) -> dict[str, Any]:
+    """Update storage adapter settings for this project.
+
+    Use when coordination needs change:
+    - Started alone, now have team members → switch from "single-machine" to "team"
+    - Working across multiple machines now → switch to "multi-machine"
+    - Simplifying back to single-machine → switch to "single-machine"
+
+    Parameters:
+    - adapter: Storage adapter to use ("local" or "redis")
+    - scope: Coordination scope ("single-machine", "multi-machine", or "team")
+    - reason: Why you're making this change (for documentation)
+
+    Returns:
+        Updated settings including recommendations and next steps
+
+    Example:
+        update_storage_settings(
+            adapter="redis",
+            scope="multi-machine",
+            reason="User mentioned working from desktop at home"
+        )
+    """
+    # Validate parameters
+    valid_adapters = ["local", "redis"]
+    valid_scopes = ["single-machine", "multi-machine", "team"]
+
+    if adapter not in valid_adapters:
+        raise ValueError(f"Invalid adapter '{adapter}'. Valid options: {', '.join(valid_adapters)}")
+
+    if scope not in valid_scopes:
+        raise ValueError(f"Invalid scope '{scope}'. Valid options: {', '.join(valid_scopes)}")
+
+    # Check if recommended adapter matches requested
+    recommended = recommend_adapter(scope)  # type: ignore
+    if adapter != recommended:
+        import warnings
+
+        warnings.warn(
+            f"Adapter '{adapter}' may not support scope '{scope}'. "
+            f"Recommended adapter: '{recommended}'"
+        )
+
+    # Load current config to check adapter availability
+    config = load_config()
+    adapter_info = get_adapter_info(adapter, config)  # type: ignore
+
+    if not adapter_info["ready"]:
+        raise RuntimeError(
+            f"Adapter '{adapter}' is not configured. "
+            f"Setup required: {adapter_info['setup_instructions']}"
+        )
+
+    # Update settings file
+    if settings_manager.exists():
+        settings_manager.update(
+            storage_adapter=adapter,  # type: ignore
+            coordination_scope=scope,  # type: ignore
+            notes=reason,
+        )
+    else:
+        settings_manager.save(
+            storage_adapter=adapter,  # type: ignore
+            coordination_scope=scope,  # type: ignore
+            notes=reason,
+        )
+
+    # Return new settings with guidance
+    new_settings = settings_manager.load()
+    scope_info = get_scope_description(scope)  # type: ignore
+
+    return {
+        "status": "updated",
+        "settings": new_settings,
+        "adapter_info": adapter_info,
+        "scope_info": scope_info,
+        "next_steps": [
+            "Settings saved to .claude/settings.local.json",
+            "Restart MCP server for changes to take effect",
+            "New sessions will use the updated adapter",
+        ],
+    }
+
+
 # Resource implementations
 
 
@@ -391,6 +482,85 @@ def get_session_state(instance_id: str) -> str:
     return json.dumps(state, indent=2)
 
 
+@app.resource("session://storage-config")
+def get_storage_config() -> str:
+    """Show current storage settings and available options.
+
+    This resource provides information about:
+    - Current storage adapter settings (from .claude/settings.local.json)
+    - Available storage adapters and their readiness
+    - Recommendations based on coordination scope
+    - Instructions for switching adapters
+
+    Returns:
+        JSON string with storage configuration information
+    """
+    import json
+
+    # Load current settings
+    current_settings = settings_manager.load()
+
+    # Load configuration to check adapter availability
+    config = load_config()
+
+    # Get info for all available adapters
+    available_options = {
+        "local": get_adapter_info("local", config),
+        "redis": get_adapter_info("redis", config),
+    }
+
+    # Build response
+    response: dict[str, Any] = {
+        "current_settings": current_settings,
+        "available_options": available_options,
+    }
+
+    # Add recommendation if settings exist
+    if current_settings:
+        current_scope = current_settings.get("coordination_scope")
+        if current_scope:
+            recommended_adapter = recommend_adapter(current_scope)  # type: ignore
+            current_adapter = current_settings.get("storage_adapter")
+
+            if current_adapter != recommended_adapter:
+                response["recommendation"] = {
+                    "message": (
+                        f"For '{current_scope}' scope, " f"'{recommended_adapter}' is recommended"
+                    ),
+                    "current": current_adapter,
+                    "recommended": recommended_adapter,
+                    "scope_info": get_scope_description(current_scope),  # type: ignore
+                }
+            else:
+                response["recommendation"] = None
+    else:
+        # First run - provide guidance
+        response["recommendation"] = {
+            "message": (
+                "No storage preferences configured yet. " "Use update_storage_settings() to set up."
+            ),
+            "options": [
+                {
+                    "scope": "single-machine",
+                    "adapter": "local",
+                    "description": get_scope_description("single-machine"),
+                },
+                {
+                    "scope": "multi-machine",
+                    "adapter": "redis",
+                    "description": get_scope_description("multi-machine"),
+                },
+                {
+                    "scope": "team",
+                    "adapter": "redis",
+                    "description": get_scope_description("team"),
+                },
+            ],
+        }
+
+    return json.dumps(response, indent=2)
+
+
 # Prompt implementations
 
 
@@ -403,6 +573,56 @@ def startup() -> str:
     """
     if storage is None:
         return "⚠️ Server not initialized"
+
+    # Check if this is first run (no storage settings configured)
+    if not settings_manager.exists():
+        config = load_config()
+        local_info = get_adapter_info("local", config)
+        redis_info = get_adapter_info("redis", config)
+
+        return f"""
+# Welcome to Claude Session Coordinator!
+
+⚠️ **First-time setup needed** - No storage preferences configured yet.
+
+## Quick Setup
+
+I need to know your coordination needs to configure the right storage adapter.
+
+**Choose one:**
+
+1. **Single-machine** → Local file storage (simple, no setup)
+   - Status: {"✅ Ready" if local_info['ready'] else "❌ Not available"}
+   - Just you, working on this machine only
+
+2. **Multi-machine** → Redis (cross-machine coordination)
+   - Status: {"✅ Ready" if redis_info['ready'] else "❌ Needs Redis setup"}
+   - You working from laptop + desktop + etc.
+
+3. **Team collaboration** → Redis (shared state across team)
+   - Status: {"✅ Ready" if redis_info['ready'] else "❌ Needs Redis setup"}
+   - Multiple people working together
+
+**To set up, call:**
+```
+update_storage_settings(
+    adapter="local",  # or "redis"
+    scope="single-machine",  # or "multi-machine" or "team"
+    reason="Your reason here"
+)
+```
+
+**Need more details?** Read the `first_run_storage` prompt for full explanations.
+
+---
+
+What are your coordination needs?
+"""
+
+    # Settings exist - proceed with normal startup
+    current_settings = settings_manager.load()
+    current_adapter = current_settings.get("storage_adapter") if current_settings else "unknown"
+    current_scope = current_settings.get("coordination_scope") if current_settings else "unknown"
 
     instances_scope = f"{machine_id}:{project_id}:instances"
     instances = storage.retrieve(instances_scope, "registry") or {
@@ -432,6 +652,10 @@ Please wait for an instance to become available, or ask the user which instance 
 
 You are starting a new session in: **{project_id}**
 Machine: {machine_id}
+
+## Storage Configuration
+- Adapter: {current_adapter}
+- Scope: {current_scope}
 
 ## Current Status
 
@@ -492,6 +716,72 @@ Are you ready to sign off?
 All tasks complete{f" for issue #{current_issue}" if current_issue else ""}!
 
 Call `sign_off()` to release instance {current_session['session_id']}.
+"""
+
+
+@app.prompt()
+def first_run_storage() -> str:
+    """Guide users through storage adapter selection on first run.
+
+    This prompt is shown when .claude/settings.local.json doesn't exist yet,
+    helping users understand coordination options and make an informed choice.
+    """
+    # Load config to check adapter availability
+    config = load_config()
+    local_info = get_adapter_info("local", config)
+    redis_info = get_adapter_info("redis", config)
+
+    return f"""
+# Storage Adapter Selection
+
+This project doesn't have storage preferences configured yet.
+
+I need to understand your coordination needs to configure the right storage adapter.
+
+## Available Options
+
+### 1. Single-machine (Local Storage)
+- **Use case:** Just you, working on this machine
+- **Storage:** Simple JSON file storage
+- **Setup required:** No
+- **Best for:** Solo development on one computer
+- **Status:** {"✅ Ready" if local_info['ready'] else "❌ Not available"}
+
+### 2. Multi-machine (Redis)
+- **Use case:** You working across multiple machines (laptop + desktop)
+- **Storage:** Redis server required
+- **Setup required:** Yes (Redis must be configured)
+- **Best for:** Working from multiple locations, state syncs across machines
+- **Status:** {"✅ Ready" if redis_info['ready'] else "❌ Needs setup"}
+{f"  - Setup: {redis_info['setup_instructions']}" if not redis_info['ready'] else ""}
+
+### 3. Team collaboration (Redis)
+- **Use case:** Multiple developers working together
+- **Storage:** Shared Redis server required
+- **Setup required:** Yes (Redis must be configured)
+- **Best for:** Team projects with parallel work, real-time coordination
+- **Status:** {"✅ Ready" if redis_info['ready'] else "❌ Needs setup"}
+{f"  - Setup: {redis_info['setup_instructions']}" if not redis_info['ready'] else ""}
+
+## Next Steps
+
+Which option best describes your situation?
+
+Once you decide, call `update_storage_settings()` with:
+- **adapter:** "local" or "redis"
+- **scope:** "single-machine", "multi-machine", or "team"
+- **reason:** Brief explanation of your choice
+
+Example:
+```
+update_storage_settings(
+    adapter="local",
+    scope="single-machine",
+    reason="Solo development, working only on this laptop"
+)
+```
+
+Your choice will be saved to `.claude/settings.local.json` (gitignored).
 """
 
 

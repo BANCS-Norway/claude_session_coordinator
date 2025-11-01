@@ -318,8 +318,15 @@ class TestResources:
 class TestPrompts:
     """Tests for MCP prompts."""
 
-    def test_startup_prompt_with_available_instances(self, initialized_server):
+    def test_startup_prompt_with_available_instances(self, initialized_server, tmp_path):
         """Test the startup prompt when instances are available."""
+        # Create settings file to bypass first-run detection
+        settings_path = tmp_path / "settings.local.json"
+        settings_path.write_text(
+            '{"storage_adapter": "local", "coordination_scope": "single-machine"}'
+        )
+        server.settings_manager.settings_path = settings_path
+
         result = server.startup()
 
         assert "test-org/test-repo" in result
@@ -327,8 +334,15 @@ class TestPrompts:
         assert "claude_1" in result
         assert "sign_on()" in result
 
-    def test_startup_prompt_no_available_instances(self, initialized_server):
+    def test_startup_prompt_no_available_instances(self, initialized_server, tmp_path):
         """Test the startup prompt when no instances are available."""
+        # Create settings file to bypass first-run detection
+        settings_path = tmp_path / "settings.local.json"
+        settings_path.write_text(
+            '{"storage_adapter": "local", "coordination_scope": "single-machine"}'
+        )
+        server.settings_manager.settings_path = settings_path
+
         # Mark all instances as taken
         instances_scope = "test-machine:test-org/test-repo:instances"
         instances = {f"claude_{i}": "taken" for i in range(1, 5)}
@@ -337,6 +351,19 @@ class TestPrompts:
         result = server.startup()
 
         assert "All instances are currently taken" in result
+
+    def test_startup_prompt_first_run(self, initialized_server):
+        """Test the startup prompt on first run (no settings configured)."""
+        # Ensure no settings file exists
+        assert not server.settings_manager.exists()
+
+        result = server.startup()
+
+        assert "First-time setup needed" in result
+        assert "update_storage_settings()" in result
+        assert "single-machine" in result.lower()
+        assert "multi-machine" in result.lower()
+        assert "team" in result.lower()
 
     def test_sign_off_prompt_with_incomplete_tasks(self, initialized_server):
         """Test the sign-off prompt with incomplete tasks."""
