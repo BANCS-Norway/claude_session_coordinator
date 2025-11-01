@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "claude-session-coordinator": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "claude_session_coordinator"
+      ],
+      "env": {
+        "PYTHONPATH": "/path/to/claude_session_coordinator/packages/mcp-server/src"
+      },
+      "cwd": "/path/to/your/project"
+    }
+  }
+}
