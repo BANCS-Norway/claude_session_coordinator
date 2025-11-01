@@ -14,12 +14,12 @@
    - PR creation process
    - Cleanup procedures
 
-2. **Session Registry (Optional)** - For multi-session coordination
-   - See `.claude/DEV-SQUAD.md` or `.claude/CLONES.md` for session coordination
-   - Identify which session you are
-   - Check active missions and deployments
-   - Understand your specialization
-   - Note: Session registries are personal customizations (not tracked in git)
+2. **Session Coordination** - MCP server for multi-session coordination
+   - Use MCP tools for automated session coordination (see Session Coordination section)
+   - `mcp__claude-session-coordinator__sign_on` - Claim session at start
+   - `mcp__claude-session-coordinator__sign_off` - Release session when done
+   - Fallback: Manual `.claude/CLONES.md` editing if MCP unavailable
+   - Note: MCP server replaced manual session registries (Phase 3)
 
 ## Repository Overview
 
@@ -111,61 +111,74 @@ Claude: "Great! This seems like a documentation update that doesn't need a forma
 **For concrete issues:**
 - Issue description defines scope → read issue → run pre-flight check → proceed
 
-## Session Registry Usage (Optional)
+## Session Coordination
 
-This project supports optional session coordination using specialized session registries. These are personal customizations (not tracked in git) that help coordinate parallel Claude Code sessions.
+This project provides automated session coordination via the **claude_session_coordinator MCP server**, enabling multiple Claude Code sessions to work in parallel without conflicts.
 
-**How It Works:**
+### Primary Method: MCP Server (Automated)
 
-1. **Check if registry exists** - Look for `.claude/DEV-SQUAD.md` or `.claude/CLONES.md`
-2. **Read registry** - Understand session assignments and current deployments
-3. **Sign on** - Update your session status when starting work
-4. **Coordinate** - Check for conflicting worktrees or parallel work
-5. **Sign off** - Update status when completing work
+The MCP server provides programmatic session coordination through the following tools:
 
-**Registry Options:**
-
-- **DEV-SQUAD.md** - Professional session registry with specialized agent roles
-- **CLONES.md** - Alternative themed session registry (customizable)
-
-Both registries serve the same purpose with different naming schemes. Choose the one that matches your preference, or create your own!
-
-**🚨 CRITICAL: Template vs Working Copy**
-
-Session registries use a two-tier system:
-
-- **DEV-SQUAD.md (Template):**
-  - Git Status: Tracked in repository
-  - Purpose: Reference template for new clones
-  - Updates: ❌ **NEVER update for session state changes**
-  - Use: Read-only reference for structure
-
-- **CLONES.md (Working Copy):**
-  - Git Status: Local only (not tracked)
-  - Purpose: Active session coordination
-  - Updates: ✅ **ALWAYS update for session state changes**
-  - Use: Real-time sign-on/sign-off, progress tracking
-
-**First-Time Setup:**
-
-If `.claude/CLONES.md` doesn't exist:
-```bash
-cp .claude/DEV-SQUAD.md .claude/CLONES.md
+**Sign On:**
 ```
+mcp__claude-session-coordinator__sign_on
+```
+- Auto-detects machine (from hostname)
+- Auto-detects project (from git remote)
+- Claims session instance (e.g., `claude_1`)
+- Returns session context for coordination
 
-Then use CLONES.md for all session state updates.
+**Sign Off:**
+```
+mcp__claude-session-coordinator__sign_off
+```
+- Releases session instance for others
+- Preserves session state for future reference
 
-**Note:** Session registries are optional. If they don't exist in `.claude/`, you can work without them. This is a temporary manual solution until Phase 3 MCP automation.
+**Workflow Integration:**
+
+1. **Pre-flight check** → Verify workspace is clean
+2. **Sign on via MCP** → Claim session and coordinate
+3. **Work on issue** → Create worktree, make changes, commit
+4. **PR merged** → Sign off via MCP, clean up worktree
+
+The MCP server automatically:
+- Detects your machine and project
+- Manages session assignments
+- Stores coordination state
+- Prevents worktree conflicts
+
+**Why MCP Coordination?**
+
+The project evolved from manual session registries (Phase 1-2) to automated MCP coordination (Phase 3):
+- **Phase 1-2:** Manual CLONES.md/DEV-SQUAD.md files edited by hand
+- **Phase 3:** MCP server provides programmatic coordination API
+- **Result:** Faster, more reliable session coordination with less manual work
+
+### Fallback Method: Session Registries (Manual)
+
+If the MCP server is unavailable, you can fall back to manual session coordination using `.claude/CLONES.md` or `.claude/DEV-SQUAD.md` files.
+
+**Legacy Registry Workflow:**
+
+1. **Check registry** - Read `.claude/CLONES.md` for session assignments
+2. **Update status** - Manually edit to mark session as "deployed"
+3. **Coordinate** - Check for conflicting worktrees before starting
+4. **Sign off** - Edit file again to mark session as "standby"
+
+**Note:** Manual registries are personal customizations (not tracked in git). They were the original solution before MCP automation and remain as a fallback option.
 
 ## Development Guidelines
 
 1. **ALWAYS run pre-flight check first** (for concrete issues)
-2. **ALWAYS confirm understanding first** (for ad-hoc tasks)
-3. **ALWAYS read workflow.md before starting work**
-4. **NEVER deviate from the workflow** without user approval
-5. **Claude never pulls or pushes** - user handles that
-6. **Claude can configure GitHub settings** - via `gh api` and `gh` CLI commands
-7. **Only fix what's in the issue description** - scope is strictly limited to what's described; create new issues for discovered bugs or missing functionality
+2. **ALWAYS sign on via MCP after pre-flight check** - claim session and coordinate with other instances
+3. **ALWAYS confirm understanding first** (for ad-hoc tasks)
+4. **ALWAYS read workflow.md before starting work**
+5. **NEVER deviate from the workflow** without user approval
+6. **Claude never pulls or pushes** - user handles that
+7. **Claude can configure GitHub settings** - via `gh api` and `gh` CLI commands
+8. **Only fix what's in the issue description** - scope is strictly limited to what's described; create new issues for discovered bugs or missing functionality
+9. **ALWAYS sign off via MCP after PR is merged** - release session for others to use
 
 ## Customization
 
@@ -180,6 +193,7 @@ See `.claude/CLAUDE.md` (if it exists) for personal customizations.
 
 ---
 
-**Standard Instructions Version:** 1.0.0
+**Standard Instructions Version:** 1.1.0
 **Last Updated:** 2025-11-01
+**Changelog:** Added MCP session coordination as primary method (replaced manual session registries)
 **For customization, see:** `.claude/CLAUDE.md`
