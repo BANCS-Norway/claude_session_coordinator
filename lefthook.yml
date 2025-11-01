@@ -11,8 +11,9 @@ pre-commit:
 
     # Ruff - Fast Python linter
     ruff:
-      glob: "packages/mcp-server/**/*.py"
-      run: ruff check --config packages/mcp-server/pyproject.toml {staged_files}
+      root: "packages/mcp-server/"
+      glob: "**/*.py"
+      run: ruff check src/ tests/
 
     # Mypy - Static type checker
     mypy:
