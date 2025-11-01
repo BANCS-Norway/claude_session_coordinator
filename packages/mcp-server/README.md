@@ -84,6 +84,34 @@ sign_off()  # Releases your instance
 
 ## Features
 
+### Adaptive Storage Selection
+
+**NEW:** Claude can now help you choose and configure the right storage adapter for your needs!
+
+On first run, Claude will ask about your coordination needs:
+- **Single-machine**: Just you, working on one computer → Uses local file storage
+- **Multi-machine**: You working across multiple machines → Uses Redis
+- **Team collaboration**: Multiple people working together → Uses Redis
+
+Your choice is saved to `.claude/settings.local.json` (gitignored) and used automatically in future sessions.
+
+**To configure or change settings:**
+
+```python
+update_storage_settings(
+    adapter="local",  # or "redis"
+    scope="single-machine",  # or "multi-machine" or "team"
+    reason="Solo development on this laptop"
+)
+```
+
+**To check current settings:**
+
+Read the `session://storage-config` resource to see:
+- Current storage adapter and coordination scope
+- Available adapters and their readiness status
+- Recommendations if your adapter doesn't match your scope
+
 ### Storage Adapters
 
 Switch backends via configuration:
@@ -100,7 +128,7 @@ Switch backends via configuration:
 }
 ```
 
-**Redis (future):**
+**Redis:**
 ```json
 {
   "storage": {
@@ -112,19 +140,26 @@ Switch backends via configuration:
 }
 ```
 
+**Configuration Hierarchy:**
+1. **Project settings** (`.claude/settings.local.json`) - Per-project user preferences ← NEW
+2. **Global config** (config file or environment) - Available adapters and credentials
+3. **Built-in defaults** - Fallback configuration
+
 ### MCP Resources
 
 Read-only context provided automatically:
 
 - `session://context` - Current machine, project, available instances
 - `session://state/{id}` - Another session's state
+- `session://storage-config` - Storage adapter settings and recommendations ← NEW
 
 ### MCP Prompts
 
 Guides Claude automatically:
 
-- `startup` - Shows status and guides sign-on
-- `sign-off` - Reminds about incomplete work
+- `startup` - Shows status and guides sign-on (detects first-run for storage setup) ← ENHANCED
+- `sign_off` - Reminds about incomplete work
+- `first_run_storage` - Detailed guide for choosing storage adapter on first run ← NEW
 
 ## Configuration
 
