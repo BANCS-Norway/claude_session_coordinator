@@ -107,6 +107,51 @@ You should see output indicating the server has started. Press `Ctrl+C` to stop 
 
 ## Configuration
 
+### Claude Code MCP Configuration
+
+For Claude Code users, the easiest way to configure the MCP server is using the `.mcp.json` file:
+
+1. **Copy the template** (from the repository root):
+   ```bash
+   cp .mcp.json.template .mcp.json
+   ```
+
+2. **Edit the file** with your actual paths:
+   ```bash
+   nano .mcp.json
+   ```
+
+3. **Update the placeholder paths**:
+   ```json
+   {
+     "mcpServers": {
+       "claude-session-coordinator": {
+         "command": "/path/to/your/python3",
+         "args": [
+           "-m",
+           "claude_session_coordinator"
+         ],
+         "env": {},
+         "cwd": "/path/to/claude_session_coordinator"
+       }
+     }
+   }
+   ```
+
+   Replace:
+   - `/path/to/your/python3` - Path to your Python interpreter (e.g., `/home/user/python.dev/bin/python3`)
+   - `/path/to/claude_session_coordinator` - Path to the repository root
+
+4. **Restart Claude Code** - The session coordinator will be available automatically
+
+**Note:** The `.mcp.json` file is gitignored (contains machine-specific paths). Each developer should create their own copy from the template.
+
+### Alternative Configuration Methods
+
+#### MCP Client Configuration Examples
+
+See the [examples/config/](../examples/config/) directory for additional configuration examples for different MCP clients.
+
 ### Default Configuration
 
 By default, the MCP server uses:
@@ -148,7 +193,9 @@ Example configuration file:
 
 After successful installation:
 
-1. **Configure your MCP client** - See [MCP Client Configuration Examples](../examples/config/)
+1. **Configure your MCP client**:
+   - **Claude Code users**: Copy and edit `.mcp.json.template` (see [Claude Code MCP Configuration](#claude-code-mcp-configuration) above)
+   - **Other MCP clients**: See [examples/config/](../examples/config/) for configuration examples
 2. **Read the usage guide** - Learn how to use the session coordination tools
 3. **Start coordinating sessions** - Begin using multiple Claude sessions with shared state
 

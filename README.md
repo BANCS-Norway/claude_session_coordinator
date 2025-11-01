@@ -61,21 +61,41 @@ cd packages/mcp-server
 pip install -e .
 ```
 
-### Configuration
+### Quick Start with Claude Code
 
-Add to your Claude Code MCP settings:
+1. Install the MCP server:
+   ```bash
+   cd packages/mcp-server
+   pip install -e ".[dev]"
+   ```
 
-```json
-{
-  "mcpServers": {
-    "session-coordinator": {
-      "command": "python",
-      "args": ["-m", "claude_session_coordinator"],
-      "cwd": "/path/to/your/project"
-    }
-  }
-}
-```
+2. Configure Claude Code:
+   ```bash
+   # Copy the template
+   cp .mcp.json.template .mcp.json
+
+   # Edit with your paths
+   nano .mcp.json
+   ```
+
+3. Update `.mcp.json` with your actual paths:
+   ```json
+   {
+     "mcpServers": {
+       "claude-session-coordinator": {
+         "command": "/path/to/your/python3",
+         "args": [
+           "-m",
+           "claude_session_coordinator"
+         ],
+         "env": {},
+         "cwd": "/path/to/claude_session_coordinator"
+       }
+     }
+   }
+   ```
+
+4. Restart Claude Code - the session coordinator will be available automatically!
 
 ## Features
 
