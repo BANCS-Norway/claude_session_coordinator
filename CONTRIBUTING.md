@@ -375,9 +375,32 @@ If any check fails, the commit is blocked until you fix the issues.
 
 #### Running Linters Manually
 
+**Monorepo-wide linting:**
+
 ```bash
-# Check formatting with Black
+# Lint all packages in the monorepo
+npm run lint
+
+# Auto-fix issues in all packages
+npm run lint:fix
+```
+
+**Package-specific linting:**
+
+```bash
+# Lint a specific package
+npm run lint --workspace=packages/mcp-server
+
+# Auto-fix issues in a specific package
+npm run lint:fix --workspace=packages/mcp-server
+```
+
+**Direct Python tool usage (mcp-server package):**
+
+```bash
 cd packages/mcp-server
+
+# Check formatting with Black
 black --check src/ tests/
 
 # Auto-format with Black
