@@ -124,7 +124,32 @@ pip install -e .
 ### MCP Prompts
 
 - `startup` - Guides Claude through sign-on process
-- `sign-off` - Guides proper session release
+- `sign_off_prompt` - Guides proper session release
+
+### Self-Teaching Workflows
+
+The Session Coordinator includes **self-teaching workflows** that guide Claude Code automatically:
+
+**Resume Issue Workflow** - Enables seamless handoffs between Claude sessions:
+- Automatically triggered when you say "continue on issue #X"
+- Retrieves previous session's state and progress
+- Presents findings and asks for confirmation
+- Continues from exactly where the previous session stopped
+
+**How it works:**
+- Embedded in MCP server prompts (Claude sees them every time)
+- Standardized state storage keys for consistency
+- No manual explanation needed - the MCP server teaches Claude automatically
+
+**Example usage:**
+```
+You: "continue on issue #54"
+Claude: "Let me check the session coordinator... Found previous work on batch 2. Continue?"
+You: "yes"
+Claude: [Resumes from saved state automatically]
+```
+
+See [`.claude/workflow-resume-issue.md`](.claude/workflow-resume-issue.md) for detailed documentation.
 
 ## Development Status
 

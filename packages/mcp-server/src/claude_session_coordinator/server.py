@@ -440,6 +440,80 @@ def get_session_context() -> str:
             "if_signed_on": "Use store_data/retrieve_data to work with session state",
             "when_done": "Call sign_off() to release your instance",
         },
+        "workflow": {
+            "name": "Resume Issue Workflow",
+            "description": "Standard workflow for resuming work on issues",
+            "trigger_phrases": [
+                "continue on issue #X",
+                "resume issue #X",
+                "work on issue #X",
+                "pick up issue #X",
+                "continue issue #X",
+                "keep working on issue #X",
+            ],
+            "steps": [
+                {
+                    "step": 1,
+                    "action": "sign_on",
+                    "description": "Claim your session identity",
+                    "example": "sign_on('claude_1')",
+                },
+                {
+                    "step": 2,
+                    "action": "retrieve_state",
+                    "description": "Check for existing work on the issue",
+                    "keys_to_check": [
+                        "issue:{number}/status",
+                        "issue:{number}/current_batch",
+                        "issue:{number}/todos",
+                        "issue:{number}/next_steps",
+                        "issue:{number}/worktree",
+                        "issue:{number}/branch",
+                    ],
+                },
+                {
+                    "step": 3,
+                    "action": "present_findings",
+                    "description": "Show user what you found and ask for confirmation",
+                },
+                {
+                    "step": 4,
+                    "action": "work_and_store",
+                    "description": "Continue work and store progress regularly",
+                },
+                {
+                    "step": 5,
+                    "action": "sign_off",
+                    "description": "Release your session when done",
+                    "example": "sign_off()",
+                },
+            ],
+        },
+        "best_practices": {
+            "state_keys": {
+                "issue:{number}/status": "Track overall issue status (in_progress|paused|complete|blocked)",
+                "issue:{number}/current_batch": "Track progress through work batches",
+                "issue:{number}/todos": "Store detailed task breakdown",
+                "issue:{number}/next_steps": "Document handoff information for next session",
+                "issue:{number}/worktree": "Store worktree path (.worktrees/issue-X)",
+                "issue:{number}/branch": "Store branch name",
+                "issue:{number}/commits": "Track commit hashes",
+                "issue:{number}/decisions": "Document important decisions made",
+                "issue:{number}/blockers": "Note blocking issues",
+            },
+            "timing": {
+                "sign_on": "Immediately when starting work",
+                "retrieve_state": "Before beginning any work on an issue",
+                "store_progress": "After each batch/milestone completion",
+                "store_next_steps": "Before breaks or focus changes",
+                "sign_off": "When completing work or ending session",
+            },
+        },
+        "quick_start": {
+            "if_continuing_work": "1. sign_on() → 2. retrieve_data() → 3. Present to user → 4. Continue",
+            "if_starting_new": "1. sign_on() → 2. Check GitHub issue → 3. Begin work → 4. Store state",
+            "if_switching_tasks": "1. Store current state → 2. sign_off() → 3. sign_on() for new task",
+        },
     }
 
     import json
@@ -662,6 +736,40 @@ Machine: {machine_id}
 Available instances: {available_list}
 Active sessions: {active_count}
 
+## 📋 Resume Issue Workflow
+
+### Trigger Patterns
+
+When the user says ANY of these phrases:
+- "continue on issue #X"
+- "resume issue #X"
+- "work on issue #X"
+- "pick up issue #X"
+
+**ALWAYS follow this workflow:**
+
+1. **Sign on**: `sign_on()` to claim instance `{first_available}`
+2. **Check for existing state**: `retrieve_data("issue:{{number}}", "status")` + other keys
+3. **Present findings**: Show user what you found and ask for confirmation
+4. **Work & store progress**: Continue work, store state regularly
+5. **Sign off**: `sign_off()` when done
+
+### State Storage Keys (Standardized)
+
+```
+issue:{{number}}/status         → "in_progress"|"paused"|"complete"|"blocked"
+issue:{{number}}/current_batch  → Batch number currently working on
+issue:{{number}}/todos          → Array of remaining tasks
+issue:{{number}}/next_steps     → Array of next actions for handoff
+issue:{{number}}/worktree       → Path to worktree (.worktrees/issue-X)
+issue:{{number}}/branch         → Branch name
+issue:{{number}}/commits        → Array of commit hashes
+issue:{{number}}/decisions      → Array of important decisions made
+issue:{{number}}/blockers       → Array of blocking issues
+```
+
+**Read `session://context` for full workflow details and best practices.**
+
 ## Next Steps
 
 1. **Sign on**: Call `sign_on()` to claim instance `{first_available}`
@@ -702,12 +810,22 @@ def sign_off_prompt() -> str:
 You have {len(incomplete)} incomplete tasks:
 {todo_list}
 
-Before signing off:
-1. Save current progress to session state
-2. Ensure all important work is committed
-3. Call `sign_off()` to release instance {current_session['session_id']}
+## Before signing off, have you stored:
 
-Are you ready to sign off?
+- [ ] Current status: `store_data("issue:{{number}}", "status", "...")`
+- [ ] Current progress: `store_data("issue:{{number}}", "current_batch", N)`
+- [ ] Next steps: `store_data("issue:{{number}}", "next_steps", [...])`
+- [ ] Any blockers: `store_data("issue:{{number}}", "blockers", [...])`
+- [ ] Final notes: `store_data("issue:{{number}}", "notes", "...")`
+
+## Ready to sign off?
+
+Call `sign_off()` to:
+- Mark session {current_session['session_id']} as available
+- Allow other Claude instances to use this session
+- Preserve all stored state for the next session
+
+**The next Claude instance will thank you for good handoff documentation!** 🎯
 """
 
     return f"""
@@ -715,7 +833,15 @@ Are you ready to sign off?
 
 All tasks complete{f" for issue #{current_issue}" if current_issue else ""}!
 
+## Have you stored handoff state?
+
+- [ ] Final status: `store_data("issue:{{number}}", "status", "complete")`
+- [ ] Summary notes: `store_data("issue:{{number}}", "final_notes", "...")`
+- [ ] Any follow-up tasks: `store_data("issue:{{number}}", "follow_up", [...])`
+
 Call `sign_off()` to release instance {current_session['session_id']}.
+
+**The next Claude instance will thank you for good handoff documentation!** 🎯
 """
 
 
