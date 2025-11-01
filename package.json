@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "lefthook install",
+    "postinstall": "lefthook install && bash scripts/fix-lefthook-worktree.sh",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present"
   },
