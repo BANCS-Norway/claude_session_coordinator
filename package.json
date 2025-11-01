@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/BANCS-Norway/claude_session_coordinator#readme",
   "devDependencies": {
-    "lefthook": "^1.10.1"
+    "lefthook": "^1.10.1",
+    "markdownlint-cli": "^0.45.0"
   }
 }

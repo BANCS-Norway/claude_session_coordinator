@@ -1,14 +1,16 @@
 # Multi-Session Coordination Example
 
-This guide demonstrates advanced patterns for coordinating multiple Claude instances working on the same project.
+This guide demonstrates advanced patterns for coordinating multiple Claude
+instances working on the same project.
 
 ## Scenario: Parallel Development
 
-You have multiple Claude Code windows open, each working on different tasks in the same repository.
+You have multiple Claude Code windows open, each working on different tasks in
+the same repository.
 
 ## Architecture
 
-```
+```text
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │  Claude Window 1│     │  Claude Window 2│     │  Claude Window 3│
 │   (claude_1)    │     │   (claude_2)    │     │   (claude_3)    │
@@ -215,7 +217,10 @@ def check_progress(issue_id):
     scope = f"issue:{issue_id}"
     progress = retrieve_data(scope, "progress")
     if progress:
-        return f"Issue #{issue_id}: {progress['phase']} ({progress['percent']}%) - {progress['message']}"
+        phase = progress['phase']
+        percent = progress['percent']
+        message = progress['message']
+        return f"Issue #{issue_id}: {phase} ({percent}%) - {message}"
     return f"Issue #{issue_id}: No progress data"
 
 # Monitor other issues
@@ -554,5 +559,7 @@ def cleanup_abandoned_sessions(timeout_minutes=60):
 ## Next Steps
 
 - See [Basic Usage](basic-usage.md) for fundamentals
-- Check [Architecture Overview](../../docs/architecture/overview.md) for system design
-- Read about [Storage Adapters](../README.md#storage-adapters) for scaling beyond local files
+- Check [Architecture Overview](../../docs/architecture/overview.md) for
+  system design
+- Read about [Storage Adapters](../README.md#storage-adapters) for scaling
+  beyond local files

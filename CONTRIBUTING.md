@@ -1,6 +1,8 @@
 # Contributing to Claude Session Coordinator
 
-Thank you for your interest in contributing to Claude Session Coordinator! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Claude Session Coordinator!
+This document provides guidelines and instructions for contributing to the
+project.
 
 ## Table of Contents
 
@@ -28,11 +30,14 @@ Thank you for your interest in contributing to Claude Session Coordinator! This 
 
 1. Fork the repository on GitHub
 2. Clone your fork locally:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/claude_session_coordinator.git
    cd claude_session_coordinator
    ```
+
 3. Add the upstream repository:
+
    ```bash
    git remote add upstream https://github.com/BANCS-Norway/claude_session_coordinator.git
    ```
@@ -40,22 +45,26 @@ Thank you for your interest in contributing to Claude Session Coordinator! This 
 ### Development Environment Setup
 
 1. Install git hooks (Lefthook):
+
    ```bash
    npm install
    ```
 
    This will automatically:
+
    - Install Lefthook locally
    - Set up git hooks for automatic linting
    - Configure pre-commit checks (Black, Ruff, Mypy)
 
 2. Create a virtual environment:
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. Install the package in development mode:
+
    ```bash
    cd packages/mcp-server
    pip install -e .
@@ -70,23 +79,30 @@ This project uses a **rebase-only workflow** to maintain a clean, linear Git his
 
 The repository is configured to enforce a clean, linear Git history:
 
-- **Direct commits to `main` are blocked** - All changes must go through pull requests
-- **Only rebase and merge allowed** - Merge commits and squash merging are disabled
-- **Branches must be up to date with main before merging** - GitHub will require you to rebase on the latest main before allowing merge
-- **Linear history enforced** - The commit history must be linear (no merge commits)
-- **Force pushes disabled on main** - Main branch is protected from force pushes
+- **Direct commits to `main` are blocked** - All changes must go through pull
+  requests
+- **Only rebase and merge allowed** - Merge commits and squash merging are
+  disabled
+- **Branches must be up to date with main before merging** - GitHub will
+  require you to rebase on the latest main before allowing merge
+- **Linear history enforced** - The commit history must be linear (no merge
+  commits)
+- **Force pushes disabled on main** - Main branch is protected from force
+  pushes
 
-These settings ensure every commit in main is a meaningful, atomic change that can be easily reviewed, reverted, or bisected.
+These settings ensure every commit in main is a meaningful, atomic change that
+can be easily reviewed, reverted, or bisected.
 
 ### Branch Naming Conventions
 
 Create descriptive branch names using this format:
 
-```
+```text
 <type>/<issue-number>-<short-description>
 ```
 
 **Types:**
+
 - `feat/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation changes
@@ -96,6 +112,7 @@ Create descriptive branch names using this format:
 - `chore/` - Maintenance tasks
 
 **Examples:**
+
 - `feat/42-redis-adapter`
 - `fix/89-session-timeout`
 - `docs/14-contributing`
@@ -111,7 +128,8 @@ git checkout -b feat/123-your-feature
 
 ### Keeping Your PR Up-to-Date with Main
 
-Before submitting or when requested during review, rebase your branch on the latest main:
+Before submitting or when requested during review, rebase your branch on the
+latest main:
 
 ```bash
 git checkout your-feature-branch
@@ -133,25 +151,29 @@ Push your rebased branch:
 git push --force-with-lease origin your-feature-branch
 ```
 
-**Important:** Use `--force-with-lease` instead of `--force` to avoid accidentally overwriting work.
+**Important:** Use `--force-with-lease` instead of `--force` to avoid
+accidentally overwriting work.
 
 ### Why Rebase-Only Workflow?
 
 This repository enforces a rebase-only workflow for several important reasons:
 
 **Clean History:**
+
 - Linear commit history without merge bubbles
 - Easy to read `git log` output
 - Simple to understand project evolution
 - Straightforward to bisect when debugging
 
 **Integration Safety:**
+
 - PRs must be rebased on latest main before merge
 - Ensures all changes are tested against current codebase
 - Prevents "works on my branch" integration issues
 - Reduces merge conflicts and integration bugs
 
 **Best Practices:**
+
 - Follows modern Git workflow patterns
 - Makes reverting changes simpler
 - Each commit in main represents a complete, tested change
@@ -159,24 +181,28 @@ This repository enforces a rebase-only workflow for several important reasons:
 
 ### What Happens When Your PR is Not Up-to-Date?
 
-When main has new commits after you created your branch, GitHub will prevent merging your PR with a message like:
+When main has new commits after you created your branch, GitHub will prevent
+merging your PR with a message like:
 
 > "This branch is out-of-date with the base branch"
 
 **To resolve this:**
 
 1. Fetch the latest changes from upstream:
+
    ```bash
    git fetch upstream
    ```
 
 2. Rebase your branch on the latest main:
+
    ```bash
    git checkout your-feature-branch
    git rebase upstream/main
    ```
 
 3. Resolve any conflicts if they occur:
+
    ```bash
    # Edit conflicted files in your editor
    git add <resolved-files>
@@ -184,13 +210,16 @@ When main has new commits after you created your branch, GitHub will prevent mer
    ```
 
 4. Force push your rebased branch:
+
    ```bash
    git push --force-with-lease origin your-feature-branch
    ```
 
 5. GitHub will now allow your PR to be merged
 
-**Note:** After rebasing, your commit SHAs will change (this is normal and expected). The `--force-with-lease` flag ensures you don't accidentally overwrite any work that may have been pushed to your branch by someone else.
+**Note:** After rebasing, your commit SHAs will change (this is normal and
+expected). The `--force-with-lease` flag ensures you don't accidentally
+overwrite any work that may have been pushed to your branch by someone else.
 
 ## Making Changes
 
@@ -239,9 +268,10 @@ def sign_on(instance_id: str, context: dict[str, Any]) -> SessionState:
 
 ### Commit Message Conventions
 
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+Follow the [Conventional Commits](https://www.conventionalcommits.org/)
+specification:
 
-```
+```text
 <type>(<scope>): <description>
 
 [optional body]
@@ -250,6 +280,7 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -258,25 +289,26 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 - `test`: Adding/updating tests
 - `chore`: Maintenance tasks
 
-**Scope:** Package name or feature area (e.g., `mcp-server`, `storage`, `homepage`)
+**Scope:** Package name or feature area (e.g., `mcp-server`, `storage`,
+`homepage`)
 
 **Examples:**
 
-```
+```text
 feat(mcp-server): add session sign-on tool
 
 Implements the sign_on() MCP tool that allows Claude sessions
 to register and claim instance identifiers.
 ```
 
-```
+```text
 fix(storage): handle null values in local adapter
 
 The local file adapter now properly handles null values when
 retrieving data, preventing KeyError exceptions.
 ```
 
-```
+```text
 docs(readme): update installation instructions
 
 Added clarification for Python version requirements and
@@ -298,7 +330,7 @@ virtual environment setup.
 
 Use the same format as commit messages:
 
-```
+```text
 <type>(<scope>): <description>
 ```
 
@@ -359,31 +391,39 @@ pytest -k "test_sign_on"
 
 ### Git Hooks (Lefthook)
 
-This repository uses [Lefthook](https://github.com/evilmartians/lefthook) for automatic code quality checks.
+This repository uses [Lefthook](https://github.com/evilmartians/lefthook)
+for automatic code quality checks.
 
 **Hooks are automatically installed when you run `npm install`.**
 
 #### What Happens on Commit
 
-Lefthook automatically runs **language-appropriate linters** based on the files you're committing:
+Lefthook automatically runs **language-appropriate linters** based on the
+files you're committing:
 
 **For Python files** (`packages/mcp-server/**/*.py`):
+
 1. **Black** - Code formatter (checks formatting)
 2. **Ruff** - Fast Python linter (checks code quality)
 3. **Mypy** - Type checker (validates type hints)
 
 **For Markdown files** (`**/*.md`):
+
 - **markdownlint** - Markdown linting (if installed globally)
 
 **For YAML files** (`**/*.yml`, `**/*.yaml`):
+
 - **yamllint** - YAML linting (if installed globally)
 
 **For JSON files** (`**/*.json`):
+
 - **Python json.tool** - JSON syntax validation (always available)
 
 If any check fails, the commit is blocked until you fix the issues.
 
-**Note:** Markdown and YAML linters are optional. If not installed, Lefthook will warn but allow the commit. Install them for full linting coverage:
+**Note:** Markdown and YAML linters are optional. If not installed, Lefthook
+will warn but allow the commit. Install them for full linting coverage:
+
 ```bash
 # Markdown linting
 npm install -g markdownlint-cli
@@ -447,11 +487,13 @@ git commit --no-verify -m "message"
 LEFTHOOK=0 git commit -m "message"
 ```
 
-**Note:** Even if you skip hooks locally, CI/CD will still enforce these checks on your PR.
+**Note:** Even if you skip hooks locally, CI/CD will still enforce these
+checks on your PR.
 
 #### Troubleshooting
 
 **Hooks not running?**
+
 ```bash
 # Reinstall hooks
 npm install
@@ -461,6 +503,7 @@ npx lefthook install
 ```
 
 **Linters not found?**
+
 ```bash
 # Make sure development dependencies are installed
 cd packages/mcp-server
@@ -516,6 +559,7 @@ Use the feature request template when creating issues.
 ### Using Issue Templates
 
 This repository provides issue templates for:
+
 - Bug reports
 - Feature requests
 - Documentation improvements
@@ -527,39 +571,47 @@ Please use the appropriate template when creating issues.
 Issues are organized using labels:
 
 **Priority:**
+
 - `priority: high` - Immediate attention
 - `priority: medium` - Important, address soon
 - `priority: low` - Nice to have
 
 **Type:**
+
 - `type: bug` - Something isn't working
 - `type: feature` - New feature request
 - `type: enhancement` - Enhancement to existing feature
 - `type: documentation` - Documentation improvements
 
 **Component:**
+
 - `component: mcp-server` - MCP server implementation
 - `component: storage` - Storage adapter functionality
 - `component: homepage` - Homepage/documentation site
 - `component: docs` - Documentation
 
 **Status:**
+
 - `status: in-progress` - Currently being worked on
 - `status: blocked` - Cannot proceed due to dependencies
 - `status: needs-review` - Needs review/feedback
 
 **Community:**
+
 - `good first issue` - Good for newcomers
 - `help wanted` - Extra attention needed
 
 ## Code of Conduct
 
-This project adheres to a Code of Conduct that all contributors are expected to follow. Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+This project adheres to a Code of Conduct that all contributors are expected
+to follow. Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before
+contributing.
 
 ## Questions and Support
 
 - **Issues:** For bug reports and feature requests
-- **Discussions:** For questions, ideas, and general discussion (coming soon)
+- **Discussions:** For questions, ideas, and general discussion
+  (coming soon)
 - **Email:** For private inquiries, contact the maintainers
 
 ### Getting Help
@@ -571,7 +623,7 @@ If you're stuck or have questions:
 3. Ask in GitHub Discussions (when available)
 4. Create a new issue with the `question` label
 
-## Thank You!
+## Thank You
 
 Your contributions make this project better. Whether it's:
 
@@ -585,4 +637,5 @@ We appreciate your help and involvement in the Claude Session Coordinator commun
 
 ---
 
-**Note:** This project is not affiliated with Anthropic PBC. See [README.md](README.md) for disclaimers.
+**Note:** This project is not affiliated with Anthropic PBC. See
+[README.md](README.md) for disclaimers.

@@ -9,14 +9,18 @@ We take security seriously and will address reported vulnerabilities promptly.
 | 0.x.x   | :white_check_mark: | Pre-release (internal phase)    |
 
 **Current Status:**
-- **Phase 1 (Internal Development):** All reported security issues will be addressed
-- **Post-1.0 Release:** We will support the latest stable version with security updates
+
+- **Phase 1 (Internal Development):** All reported security issues will be
+  addressed
+- **Post-1.0 Release:** We will support the latest stable version with
+  security updates
 
 ## Reporting a Vulnerability
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-We strongly prefer private disclosure to protect users while we develop and deploy fixes.
+We strongly prefer private disclosure to protect users while we develop and
+deploy fixes.
 
 ### Preferred Method: GitHub Security Advisories
 
@@ -30,7 +34,7 @@ Report vulnerabilities via GitHub Security Advisories:
 
 If you're unable to use GitHub Security Advisories, you can email:
 
-**security@bancs.no**
+**<security@bancs.no>**
 
 Please encrypt sensitive details using our PGP key if possible.
 
@@ -43,7 +47,8 @@ To help us understand and address the vulnerability quickly, please include:
 - **Proof of Concept:** Code, configuration, or commands demonstrating the vulnerability
 - **Impact Assessment:** Your analysis of the potential impact and severity
 - **Affected Versions:** Which versions are vulnerable
-- **Affected Components:** Which parts of the system (MCP server, storage adapters, etc.)
+- **Affected Components:** Which parts of the system (MCP server, storage
+  adapters, etc.)
 - **Suggested Fix:** If you have ideas for remediation (optional but appreciated)
 
 ### Response Timeline
@@ -64,10 +69,12 @@ We follow coordinated disclosure principles:
 3. **We confirm** the vulnerability and assess severity
 4. **We develop** a fix and test thoroughly
 5. **We release** a patched version
-6. **Public disclosure** occurs after patch is available (typically 90 days or when patch is released, whichever comes first)
+6. **Public disclosure** occurs after patch is available (typically 90 days
+   or when patch is released, whichever comes first)
 7. **We credit** security researchers (unless anonymity is requested)
 
 **Embargo Period:**
+
 - Please do not disclose the vulnerability publicly until we've released a fix
 - We'll work with you to coordinate public disclosure timing
 - We aim to release fixes as quickly as possible while ensuring quality
@@ -76,16 +83,20 @@ We follow coordinated disclosure principles:
 
 ### Storage Security
 
-The Claude Session Coordinator supports multiple storage backends. Each has different security considerations:
+The Claude Session Coordinator supports multiple storage backends. Each has
+different security considerations:
 
 #### Local File Storage
 
 - **Storage Location:** `.claude/session-state/` in project directory
-- **File Permissions:** Ensure files are only readable by your user account (`chmod 600` or equivalent)
-- **Sensitive Data:** Session state may contain sensitive context; consider encrypting files at rest
+- **File Permissions:** Ensure files are only readable by your user account
+  (`chmod 600` or equivalent)
+- **Sensitive Data:** Session state may contain sensitive context; consider
+  encrypting files at rest
 - **Backup Security:** Secure backups appropriately; they contain session data
 
 **Best Practices:**
+
 ```bash
 # Set restrictive permissions on session state directory
 chmod 700 ~/.claude/session-state/
@@ -117,6 +128,7 @@ chmod 600 ~/.claude/session-state/*.json
   - Use Redis 6+ ACL for fine-grained access control
 
 **Best Practices:**
+
 ```bash
 # Example secure Redis connection string
 rediss://:your-strong-password@localhost:6379/0
@@ -127,9 +139,12 @@ export REDIS_URL="rediss://..."
 
 ### General Security Best Practices
 
-1. **Credentials:** Never store credentials, API keys, or secrets in session state
-2. **Environment Variables:** Use environment variables for sensitive configuration
-3. **Access Control:** Limit access to session state files/databases to necessary users only
+1. **Credentials:** Never store credentials, API keys, or secrets in session
+   state
+2. **Environment Variables:** Use environment variables for sensitive
+   configuration
+3. **Access Control:** Limit access to session state files/databases to
+   necessary users only
 4. **Dependency Updates:** Keep dependencies updated to receive security patches
 5. **Network Exposure:** Don't expose MCP server or storage to untrusted networks
 6. **Audit Logs:** Monitor access to session storage for suspicious activity
@@ -199,7 +214,8 @@ The following are generally out of scope:
 - **Expected Behavior:**
   - Features working as designed and documented
 
-**Note:** If you're unsure whether something is in scope, please report it anyway. We'd rather review it than miss a real issue.
+**Note:** If you're unsure whether something is in scope, please report it
+anyway. We'd rather review it than miss a real issue.
 
 ## Security Updates
 
@@ -215,12 +231,14 @@ When we release security updates:
 We deeply appreciate security researchers who help keep our users safe.
 
 **Recognition:**
+
 - Listed in security advisory (if desired)
 - Credited in release notes
 - Mentioned in CHANGELOG.md
 - Public acknowledgment on project website (when available)
 
 **Anonymity:**
+
 - We'll respect requests for anonymous reporting
 - You can use a pseudonym or handle
 - Let us know your preference when reporting
@@ -228,22 +246,24 @@ We deeply appreciate security researchers who help keep our users safe.
 ## Questions?
 
 If you have questions about:
+
 - This security policy
 - Whether something qualifies as a security issue
 - Our security practices
 
 Please reach out via:
+
 - GitHub Discussions (for general security questions)
-- Email: security@bancs.no (for confidential inquiries)
+- Email: <security@bancs.no> (for confidential inquiries)
 
 ## Security Contact
 
-- **Email:** security@bancs.no
+- **Email:** <security@bancs.no>
 - **GitHub:** [@BANCS-Norway](https://github.com/BANCS-Norway)
 - **Security Advisories:** [Report a vulnerability](https://github.com/BANCS-Norway/claude_session_coordinator/security/advisories/new)
 
 ---
 
-*Last Updated: 2025-10-31*
+**Last Updated:** 2025-10-31
 
 Thank you for helping keep Claude Session Coordinator and its users safe!

@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Session Coordinator MCP server enables multiple Claude AI sessions to share state and coordinate work across machines. It uses a **storage adapter pattern** to support multiple backend implementations.
+The Session Coordinator MCP server enables multiple Claude AI sessions to
+share state and coordinate work across machines. It uses a **storage adapter
+pattern** to support multiple backend implementations.
 
 ## Core Design Principles
 
@@ -64,6 +66,7 @@ class StorageAdapter(ABC):
 ### Configuration Format
 
 **config.json:**
+
 ```json
 {
   "storage": {
@@ -80,6 +83,7 @@ class StorageAdapter(ABC):
 ```
 
 **For Redis (future):**
+
 ```json
 {
   "storage": {
@@ -98,6 +102,7 @@ class StorageAdapter(ABC):
 ```
 
 **For S3 (future):**
+
 ```json
 {
   "storage": {
@@ -114,12 +119,14 @@ class StorageAdapter(ABC):
 ## Scope Format
 
 All scopes follow the pattern:
-```
+
+```text
 {machine}:{owner}/{repo}:{scope_type}:{scope_id}
 ```
 
 **Examples:**
-```
+
+```text
 my-laptop:BANCS-Norway/claude_session_cordinator:session:claude_1
 my-laptop:BANCS-Norway/claude_session_cordinator:instances
 desktop:BANCS-Norway/claude_session_cordinator:issue:15
@@ -127,22 +134,28 @@ aws-vm-1:nxtl/project:session:claude_2
 ```
 
 **Components:**
+
 - `machine` - Hostname or configured machine identifier
-- `owner/repo` - From git remote URL (e.g., `BANCS-Norway/claude_session_cordinator`)
+- `owner/repo` - From git remote URL (e.g.,
+  `BANCS-Norway/claude_session_cordinator`)
 - `scope_type` - Logical grouping (session, issue, instances, etc.)
-- `scope_id` - Specific identifier (optional for global scopes like "instances")
+- `scope_id` - Specific identifier (optional for global scopes like
+  "instances")
 
 **Benefits:**
+
 - Phase 1: All scopes on same machine, works locally
 - Future: Multiple machines coordinate via shared storage (Redis)
-- Easy filtering: `list_scopes("my-laptop:*")` or `list_scopes("*:BANCS-Norway/*:session:*")`
+- Easy filtering: `list_scopes("my-laptop:*")` or
+  `list_scopes("*:BANCS-Norway/*:session:*")`
 
 ## Phase 1: Local File Adapter
 
 ### Implementation
 
 **File structure:**
-```
+
+```text
 .claude/session-state/
   my-laptop__BANCS-Norway__claude_session_cordinator__session__claude_1.json
   my-laptop__BANCS-Norway__claude_session_cordinator__session__claude_2.json
@@ -150,11 +163,13 @@ aws-vm-1:nxtl/project:session:claude_2
 ```
 
 **File naming:**
+
 - Scope separators (`:`, `/`) replaced with `__` for filesystem safety
 - One JSON file per scope
 - File contains: `{"data": {key: value, ...}, "metadata": {...}}`
 
 **Example file content:**
+
 ```json
 {
   "scope": "my-laptop:BANCS-Norway/claude_session_cordinator:session:claude_1",
@@ -207,7 +222,8 @@ class LocalFileAdapter(StorageAdapter):
         with open(filepath, 'r') as f:
             return json.load(f)
 
-    def _write_scope_file(self, scope: str, data: dict, update_timestamp: bool = True):
+    def _write_scope_file(self, scope: str, data: dict,
+                          update_timestamp: bool = True):
         """Write entire scope file"""
         filepath = self._scope_to_filename(scope)
 
@@ -215,9 +231,11 @@ class LocalFileAdapter(StorageAdapter):
         scope_data["data"] = data
 
         if update_timestamp:
-            scope_data["metadata"]["updated_at"] = datetime.utcnow().isoformat() + "Z"
+            now = datetime.utcnow().isoformat() + "Z"
+            scope_data["metadata"]["updated_at"] = now
             if "created_at" not in scope_data["metadata"]:
-                scope_data["metadata"]["created_at"] = scope_data["metadata"]["updated_at"]
+                scope_data["metadata"]["created_at"] = \
+                    scope_data["metadata"]["updated_at"]
 
         with open(filepath, 'w') as f:
             json.dump(scope_data, f, indent=2)
@@ -265,17 +283,20 @@ class LocalFileAdapter(StorageAdapter):
 ### Characteristics
 
 **Pros:**
+
 - ✅ No external dependencies
 - ✅ Easy to inspect/debug (just open JSON files)
 - ✅ Works offline
 - ✅ Simple setup
 
 **Cons:**
+
 - ❌ Local only (can't coordinate across machines)
 - ❌ No atomic operations
 - ❌ No built-in TTL/expiry
 
 **Concurrency:**
+
 - Same-machine: Safe (each session writes to own scope file)
 - Cross-machine: Not applicable (files are local)
 
@@ -353,9 +374,10 @@ class RedisAdapter(StorageAdapter):
         self.client.close()
 ```
 
-### Characteristics
+### Redis Adapter Characteristics
 
 **Pros:**
+
 - ✅ Cross-machine coordination
 - ✅ Fast operations (in-memory)
 - ✅ Atomic operations available (SETNX, INCR)
@@ -363,11 +385,13 @@ class RedisAdapter(StorageAdapter):
 - ✅ Pub/Sub for real-time notifications
 
 **Cons:**
+
 - ❌ Requires Redis server
 - ❌ Network dependency
 - ❌ Costs (if using cloud Redis)
 
 **Concurrency:**
+
 - Thread-safe
 - Cross-machine safe
 - Atomic operations for locking
@@ -441,7 +465,8 @@ def sign_on(session_id: Optional[str] = None) -> dict:
         # Find first available
         instances_scope = f"{machine_id}:{project_id}:instances"
         instances = storage.retrieve(instances_scope, "registry") or {}
-        session_id = next((k for k, v in instances.items() if v == "available"), "claude_1")
+        session_id = next((k for k, v in instances.items()
+                          if v == "available"), "claude_1")
 
     # Mark as taken
     instances_scope = f"{machine_id}:{project_id}:instances"
@@ -545,7 +570,9 @@ def sign_off() -> dict:
 
 ### MCP Resources & Prompts (Self-Documenting Server)
 
-The MCP server provides resources and prompts that automatically guide Claude through the workflow, eliminating the need for Claude to memorize sign-on procedures.
+The MCP server provides resources and prompts that automatically guide
+Claude through the workflow, eliminating the need for Claude to memorize
+sign-on procedures.
 
 #### Resource: Session Context
 
@@ -555,10 +582,8 @@ def get_session_context() -> dict:
     """Provides current session context and guidance
 
     Claude can read this resource to understand:
-    - What machine it's on
-    - What project it's in
-    - Which instances are available
-    - What it needs to do next
+    - What machine it's on, what project it's in
+    - Which instances are available, what it needs to do next
     """
     # Get current state
     instances_scope = f"{machine_id}:{project_id}:instances"
@@ -588,7 +613,8 @@ def get_session_context() -> dict:
         "project": project_id,
         "instances": instances,
         "active_sessions": active_sessions,
-        "first_available": next((k for k, v in instances.items() if v == "available"), None),
+        "first_available": next((k for k, v in instances.items()
+                                 if v == "available"), None),
         "instructions": {
             "if_not_signed_on": "Call sign_on() to claim an instance",
             "if_signed_on": "Use store_data/retrieve_data to work with session state",
@@ -598,6 +624,7 @@ def get_session_context() -> dict:
 ```
 
 **Usage by Claude:**
+
 ```python
 # Claude automatically reads this resource when starting
 context = read_resource("session://context")
@@ -633,6 +660,7 @@ def get_session_state(instance_id: str) -> dict:
 ```
 
 **Usage:**
+
 ```python
 # Claude checks what claude_1 is doing
 state = read_resource("session://state/claude_1")
@@ -657,7 +685,8 @@ def startup_prompt() -> str:
         Active sessions:
         {format_active_sessions(context['active_sessions'])}
 
-        Please wait for an instance to become available, or ask the user which instance to use.
+        Please wait for an instance to become available, or ask the
+        user which instance to use.
         """
 
     return f"""
@@ -668,15 +697,20 @@ def startup_prompt() -> str:
 
     ## Current Status
 
-    Available instances: {[k for k, v in context['instances'].items() if v == 'available']}
-    Active sessions: {len([s for s in context['active_sessions'] if s['status'] == 'taken'])}
+    Available instances: {[k for k, v in context['instances'].items()
+                          if v == 'available']}
+    Active sessions: {len([s for s in context['active_sessions']
+                          if s['status'] == 'taken'])}
 
     ## Next Steps
 
-    1. **Sign on**: Call `sign_on()` to claim instance `{context['first_available']}`
-    2. **Check coordination**: Read other sessions' state to see what's being worked on
+    1. **Sign on**: Call `sign_on()` to claim instance
+       `{context['first_available']}`
+    2. **Check coordination**: Read other sessions' state to see what's
+       being worked on
     3. **Start work**: Use `store_data()` to track your progress
-    4. **Sign off**: When done, call `sign_off()` to release your instance
+    4. **Sign off**: When done, call `sign_off()` to release your
+       instance
 
     Would you like me to sign on now?
     """
@@ -773,19 +807,23 @@ def sign_on(session_id: Optional[str] = None) -> dict:
 ### Benefits of Self-Documenting Design
 
 **Without resources/prompts (manual):**
-```
+
+```text
 User: "Start working on issue 15"
-Claude: "Let me check what I need to do... I should probably sign on first..."
+Claude: "Let me check what I need to do... I should probably sign on
+first..."
 Claude: "How do I sign on? What parameters do I need?"
 User: "Just call sign_on()"
 Claude: "Ok, calling sign_on()..."
 ```
 
 **With resources/prompts (automatic):**
-```
+
+```text
 [Claude connects to MCP server]
 [Server sends startup prompt]
-Claude: "I can see I'm on laptop working in BANCS-Norway/claude_session_cordinator.
+Claude: "I can see I'm on laptop working in
+BANCS-Norway/claude_session_cordinator.
         Instance claude_1 is available. Let me sign on."
 Claude: [Calls sign_on() automatically]
 Claude: "Signed on as claude_1. Ready to work on issue 15!"
@@ -793,6 +831,7 @@ User: "Great!"
 ```
 
 **Key advantages:**
+
 - ✅ Claude doesn't need to memorize workflow
 - ✅ Server provides current state automatically
 - ✅ Prompts guide through each step
@@ -863,6 +902,7 @@ def detect_project_id(config: dict) -> str:
 ## Configuration File Location
 
 **Priority order:**
+
 1. `CLAUDE_SESSION_COORDINATOR_CONFIG` environment variable
 2. `./.claude/session-coordinator-config.json` (project-local)
 3. `~/.config/claude-session-coordinator/config.json` (user-global)
@@ -873,11 +913,13 @@ def detect_project_id(config: dict) -> str:
 **Phase 1 → Phase 2 (Redis):**
 
 1. Change config:
+
    ```json
    {"storage": {"adapter": "redis", "config": {...}}}
    ```
 
 2. Optionally migrate data:
+
    ```bash
    claude-session-coordinator migrate \
      --from local \
@@ -917,6 +959,7 @@ def test_list_keys(storage):
 ## Summary
 
 **Phase 1 Deliverables:**
+
 - ✅ Storage adapter interface
 - ✅ Local file adapter implementation
 - ✅ Configuration system
@@ -926,6 +969,7 @@ def test_list_keys(storage):
 - ✅ Scope format that supports future multi-machine use
 
 **Future Phases:**
+
 - Redis adapter for cross-machine coordination
 - S3/cloud storage adapter for global teams
 - PostgreSQL adapter for enterprise deployments
@@ -935,4 +979,6 @@ def test_list_keys(storage):
 - Admin dashboard/CLI
 
 **Key Benefit:**
-Users can start simple (local files) and upgrade to distributed coordination (Redis) without changing any client code!
+
+Users can start simple (local files) and upgrade to distributed
+coordination (Redis) without changing any client code!

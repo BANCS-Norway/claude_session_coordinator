@@ -1,24 +1,35 @@
 # Claude Session Coordinator
 
-A flexible MCP server enabling multiple Claude AI sessions to coordinate work across machines through shared state management.
+A flexible MCP server enabling multiple Claude AI sessions to coordinate work
+across machines through shared state management.
 
 ## ⚠️ Important Disclaimers
 
-**No Affiliation:** Claude Session Coordinator (CSC) and BANCS AS are not affiliated with, employed by, endorsed by, or sponsored by Anthropic PBC. We receive no compensation or support from Anthropic. This is an independent community project.
+**No Affiliation:** Claude Session Coordinator (CSC) and BANCS AS are not
+affiliated with, employed by, endorsed by, or sponsored by Anthropic PBC. We
+receive no compensation or support from Anthropic. This is an independent
+community project.
 
-**Use at Your Own Risk:** This software is provided "as is" without warranty of any kind. Users assume all risks associated with using this tool.
+**Use at Your Own Risk:** This software is provided "as is" without warranty
+of any kind. Users assume all risks associated with using this tool.
 
-**No Official Support:** Anthropic has not reviewed, approved, or endorsed this tool. Anthropic is not responsible for this tool's functionality or support.
+**No Official Support:** Anthropic has not reviewed, approved, or endorsed
+this tool. Anthropic is not responsible for this tool's functionality or
+support.
 
 ## Overview
 
-Claude Session Coordinator provides a storage adapter-based MCP server that enables multiple Claude sessions to:
+Claude Session Coordinator provides a storage adapter-based MCP server that
+enables multiple Claude sessions to:
+
 - Share state and coordinate work
 - Avoid conflicts when working in parallel
 - Track progress across sessions
 - Support multiple workflow patterns
 
-**Core Philosophy:** Flexible primitives over opinionated workflows. The server provides simple, universal building blocks that support any coordination pattern.
+**Core Philosophy:** Flexible primitives over opinionated workflows. The
+server provides simple, universal building blocks that support any
+coordination pattern.
 
 ## Project Structure
 
@@ -33,6 +44,7 @@ This is a monorepo containing:
 ### For Contributors/Development
 
 **Prerequisites:**
+
 - Python 3.10+
 - Node.js 18+
 - npm (comes with Node.js)
@@ -64,12 +76,14 @@ pip install -e .
 ### Quick Start with Claude Code
 
 1. Install the MCP server:
+
    ```bash
    cd packages/mcp-server
    pip install -e ".[dev]"
    ```
 
 2. Configure Claude Code:
+
    ```bash
    # Copy the template
    cp .mcp.json.template .mcp.json
@@ -79,6 +93,7 @@ pip install -e .
    ```
 
 3. Update `.mcp.json` with your actual paths:
+
    ```json
    {
      "mcpServers": {
@@ -129,17 +144,20 @@ pip install -e .
 ## Development Status
 
 **Phase 1** (Current): MCP Server Core Implementation
+
 - Storage adapter architecture
 - Local file adapter
 - Core MCP tools, resources, and prompts
 - Internal testing and iteration
 
 **Phase 2** (Future): Public Launch
+
 - Homepage and documentation site
 - PyPI publishing
 - Community announcement
 
 **Phase 3+** (Future): Ecosystem
+
 - VS Code extension
 - CLI tools
 - Web dashboard

@@ -67,7 +67,8 @@ python -m claude_session_coordinator --version
 ```
 
 Expected output:
-```
+
+```text
 claude-session-coordinator 0.1.0
 ```
 
@@ -82,7 +83,8 @@ python -m claude_session_coordinator --validate-config
 ```
 
 Expected output:
-```
+
+```text
 Validating configuration...
 ✓ Configuration loaded successfully
 ✓ Storage adapter: local
@@ -103,25 +105,30 @@ To test the server starts correctly:
 claude-session-coordinator --verbose
 ```
 
-You should see output indicating the server has started. Press `Ctrl+C` to stop the server.
+You should see output indicating the server has started. Press `Ctrl+C` to
+stop the server.
 
 ## Configuration
 
 ### Claude Code MCP Configuration
 
-For Claude Code users, the easiest way to configure the MCP server is using the `.mcp.json` file:
+For Claude Code users, the easiest way to configure the MCP server is
+using the `.mcp.json` file:
 
 1. **Copy the template** (from the repository root):
+
    ```bash
    cp .mcp.json.template .mcp.json
    ```
 
 2. **Edit the file** with your actual paths:
+
    ```bash
    nano .mcp.json
    ```
 
 3. **Update the placeholder paths**:
+
    ```json
    {
      "mcpServers": {
@@ -139,22 +146,27 @@ For Claude Code users, the easiest way to configure the MCP server is using the 
    ```
 
    Replace:
-   - `/path/to/your/python3` - Path to your Python interpreter (e.g., `/home/user/python.dev/bin/python3`)
+   - `/path/to/your/python3` - Path to your Python interpreter (e.g.,
+     `/home/user/python.dev/bin/python3`)
    - `/path/to/claude_session_coordinator` - Path to the repository root
 
-4. **Restart Claude Code** - The session coordinator will be available automatically
+4. **Restart Claude Code** - The session coordinator will be available
+   automatically
 
-**Note:** The `.mcp.json` file is gitignored (contains machine-specific paths). Each developer should create their own copy from the template.
+**Note:** The `.mcp.json` file is gitignored (contains machine-specific
+paths). Each developer should create their own copy from the template.
 
 ### Alternative Configuration Methods
 
 #### MCP Client Configuration Examples
 
-See the [examples/config/](../examples/config/) directory for additional configuration examples for different MCP clients.
+See the [examples/config/](../examples/config/) directory for additional
+configuration examples for different MCP clients.
 
 ### Default Configuration
 
 By default, the MCP server uses:
+
 - **Storage adapter**: Local file storage
 - **Storage location**: `.claude/session-state/` (created automatically)
 - **Machine ID**: Auto-detected from hostname
@@ -162,11 +174,14 @@ By default, the MCP server uses:
 
 ### Custom Configuration
 
-To customize the configuration, create a configuration file in one of these locations (in priority order):
+To customize the configuration, create a configuration file in one of these
+locations (in priority order):
 
-1. **Project-local** (recommended): `./.claude/session-coordinator-config.json`
+1. **Project-local** (recommended):
+   `./.claude/session-coordinator-config.json`
 2. **User-global**: `~/.config/claude-session-coordinator/config.json`
-3. **Environment variable**: Set `CLAUDE_SESSION_COORDINATOR_CONFIG` to the path of your config file
+3. **Environment variable**: Set `CLAUDE_SESSION_COORDINATOR_CONFIG` to the
+   path of your config file
 
 Example configuration file:
 
@@ -194,16 +209,20 @@ Example configuration file:
 After successful installation:
 
 1. **Configure your MCP client**:
-   - **Claude Code users**: Copy and edit `.mcp.json.template` (see [Claude Code MCP Configuration](#claude-code-mcp-configuration) above)
-   - **Other MCP clients**: See [examples/config/](../examples/config/) for configuration examples
+   - **Claude Code users**: Copy and edit `.mcp.json.template` (see
+     [Claude Code MCP Configuration](#claude-code-mcp-configuration) above)
+   - **Other MCP clients**: See [examples/config/](../examples/config/) for
+     configuration examples
 2. **Read the usage guide** - Learn how to use the session coordination tools
-3. **Start coordinating sessions** - Begin using multiple Claude sessions with shared state
+3. **Start coordinating sessions** - Begin using multiple Claude sessions with
+   shared state
 
 ## Troubleshooting
 
 ### Issue: `claude-session-coordinator: command not found`
 
-**Solution**: Make sure your virtual environment is activated and the package is installed:
+**Solution**: Make sure your virtual environment is activated and the package
+is installed:
 
 ```bash
 source venv/bin/activate
@@ -257,7 +276,8 @@ No special requirements. Python 3.10+ should work out of the box.
 
 ### macOS
 
-No special requirements. Python 3.10+ should work out of the box. You may need to install Python via Homebrew:
+No special requirements. Python 3.10+ should work out of the box. You may
+need to install Python via Homebrew:
 
 ```bash
 brew install python@3.11

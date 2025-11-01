@@ -1,6 +1,7 @@
 # MCP Client Configuration Examples
 
-This directory contains configuration examples for using the Claude Session Coordinator MCP server with various MCP clients.
+This directory contains configuration examples for using the Claude Session
+Coordinator MCP server with various MCP clients.
 
 ## Available Examples
 
@@ -18,7 +19,8 @@ This directory contains configuration examples for using the Claude Session Coor
 ## Important Notes
 
 - **Paths**: Update all file paths to match your system
-- **Python**: Ensure the Python path points to your virtual environment or system Python 3.10+
+- **Python**: Ensure the Python path points to your virtual environment or
+  system Python 3.10+
 - **Working directory**: Set to the root of your project repository
 - **Server location**: Update the path to where you cloned the repository
 
@@ -44,5 +46,6 @@ If the MCP server doesn't appear in your client:
 ## Support
 
 For issues or questions:
+
 - [GitHub Issues](https://github.com/BANCS-Norway/claude_session_coordinator/issues)
 - [Documentation](https://csc.bancs.no)

@@ -1,11 +1,13 @@
 # MCP Client Setup Guide
 
-This guide walks you through setting up the Claude Session Coordinator MCP server with your MCP client.
+This guide walks you through setting up the Claude Session Coordinator MCP
+server with your MCP client.
 
 ## Prerequisites
 
 1. **Install the MCP server** - Follow the [Installation Guide](../../docs/installation.md)
 2. **Verify installation**:
+
    ```bash
    claude-session-coordinator --version
    claude-session-coordinator --validate-config
@@ -18,12 +20,14 @@ Claude Code is Anthropic's official CLI tool for using Claude with code.
 ### Configuration File Location
 
 The Claude Code configuration is typically located at:
+
 - **Linux/macOS**: `~/.config/claude-code/mcp.json`
 - **Windows**: `%APPDATA%\claude-code\mcp.json`
 
 ### Setup Steps
 
 1. **Open the configuration file**:
+
    ```bash
    # Create directory if it doesn't exist
    mkdir -p ~/.config/claude-code
@@ -35,6 +39,7 @@ The Claude Code configuration is typically located at:
 2. **Add the server configuration**:
 
    If you installed with `pip install -e .` (editable mode):
+
    ```json
    {
      "mcpServers": {
@@ -48,15 +53,18 @@ The Claude Code configuration is typically located at:
    ```
 
    Replace:
-   - `/path/to/your/venv/bin/python3` with the path to your virtual environment's Python
+   - `/path/to/your/venv/bin/python3` with the path to your virtual
+     environment's Python
    - `/path/to/your/project` with your project directory
 
    To find your Python path:
+
    ```bash
    which python3  # After activating your venv
    ```
 
 3. **Test the configuration**:
+
    ```bash
    # Start Claude Code
    claude-code
@@ -68,6 +76,7 @@ The Claude Code configuration is typically located at:
 ### Example Configurations
 
 See the provided examples:
+
 - `claude-code.json` - Basic setup with PYTHONPATH
 - `claude-code-editable.json` - Setup for editable install (recommended)
 
@@ -75,21 +84,24 @@ See the provided examples:
 
 Continue is a VS Code extension that supports MCP servers.
 
-### Configuration File Location
+### VS Code Continue Configuration File Location
 
 The Continue configuration is at:
+
 - `~/.continue/config.json`
 
-### Setup Steps
+### VS Code Continue Setup Steps
 
 1. **Install Continue extension** in VS Code
 
 2. **Open the configuration**:
+
    ```bash
    code ~/.continue/config.json
    ```
 
 3. **Add the MCP server** to the `mcpServers` array:
+
    ```json
    {
      "mcpServers": [
@@ -113,25 +125,29 @@ See `vscode-continue.json` for a complete example.
 
 Cursor is an AI-first code editor with MCP support.
 
-### Configuration File Location
+### Cursor Configuration File Location
 
 The Cursor configuration is at:
+
 - **Linux/macOS**: `~/.cursor/mcp.json`
 - **Windows**: `%APPDATA%\cursor\mcp.json`
 
-### Setup Steps
+### Cursor Setup Steps
 
 1. **Create the configuration directory**:
+
    ```bash
    mkdir -p ~/.cursor
    ```
 
 2. **Create/edit the configuration file**:
+
    ```bash
    nano ~/.cursor/mcp.json
    ```
 
 3. **Add the server configuration**:
+
    ```json
    {
      "mcpServers": {
@@ -146,13 +162,14 @@ The Cursor configuration is at:
 
 4. **Restart Cursor**
 
-### Example Configuration
+### Cursor Example Configuration
 
 See `cursor.json` for a complete example.
 
 ## Custom Configuration
 
-To customize the MCP server behavior, create a configuration file in your project:
+To customize the MCP server behavior, create a configuration file in your
+project:
 
 ```bash
 # In your project directory
@@ -193,11 +210,13 @@ After configuring your MCP client:
    - 2 prompts (startup, sign-off)
 
 3. **Test a simple command**:
-   ```
+
+   ```text
    "Use the session coordinator to sign on as session claude_1"
    ```
 
 4. **Check the storage**:
+
    ```bash
    # In your project directory
    ls -la .claude/session-state/
@@ -212,17 +231,21 @@ You should see JSON files created by the session coordinator.
 **Problem**: The MCP server doesn't show up in your client.
 
 **Solutions**:
+
 1. Check the Python path is correct:
+
    ```bash
    /path/to/your/venv/bin/python3 --version
    ```
 
 2. Verify the package is installed:
+
    ```bash
    /path/to/your/venv/bin/python3 -m claude_session_coordinator --version
    ```
 
 3. Check the configuration file syntax:
+
    ```bash
    cat ~/.config/claude-code/mcp.json | python3 -m json.tool
    ```
@@ -234,6 +257,7 @@ You should see JSON files created by the session coordinator.
 **Problem**: Cannot create storage directory.
 
 **Solution**: Ensure write permissions:
+
 ```bash
 mkdir -p .claude/session-state
 chmod 755 .claude/session-state
@@ -244,6 +268,7 @@ chmod 755 .claude/session-state
 **Problem**: Module not found errors.
 
 **Solution**: Verify installation:
+
 ```bash
 source /path/to/your/venv/bin/activate
 pip install -e ".[dev]"
@@ -254,11 +279,13 @@ pip install -e ".[dev]"
 **Problem**: Custom configuration not being used.
 
 **Solution**: Check configuration file locations (in priority order):
+
 1. `CLAUDE_SESSION_COORDINATOR_CONFIG` environment variable
 2. `./.claude/session-coordinator-config.json` (project-local)
 3. `~/.config/claude-session-coordinator/config.json` (user-global)
 
 Validate your configuration:
+
 ```bash
 claude-session-coordinator --validate-config
 ```
@@ -286,9 +313,11 @@ You can set environment variables in your MCP client configuration:
 
 ### Multiple Projects
 
-To use the session coordinator across multiple projects, configure it separately for each:
+To use the session coordinator across multiple projects, configure it
+separately for each:
 
 **Project 1** (`~/projects/project-a`):
+
 ```json
 {
   "mcpServers": {
@@ -302,6 +331,7 @@ To use the session coordinator across multiple projects, configure it separately
 ```
 
 **Project 2** (`~/projects/project-b`):
+
 ```json
 {
   "mcpServers": {
@@ -314,7 +344,8 @@ To use the session coordinator across multiple projects, configure it separately
 }
 ```
 
-Each project will have its own isolated session state in `.claude/session-state/`.
+Each project will have its own isolated session state in
+`.claude/session-state/`.
 
 ## Next Steps
 

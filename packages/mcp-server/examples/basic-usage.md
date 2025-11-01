@@ -1,31 +1,35 @@
 # Basic Usage Example
 
-This guide demonstrates the fundamental workflow of using Claude Session Coordinator.
+This guide demonstrates the fundamental workflow of using Claude Session
+Coordinator.
 
 ## Prerequisites
 
 1. Install the package:
-```bash
-pip install -e .
-```
+
+   ```bash
+   pip install -e .
+   ```
 
 2. Configure your Claude Code MCP settings (`.claude/settings.local.json`):
-```json
-{
-  "mcpServers": {
-    "session-coordinator": {
-      "command": "python",
-      "args": ["-m", "claude_session_coordinator"]
-    }
-  }
-}
-```
+
+   ```json
+   {
+     "mcpServers": {
+       "session-coordinator": {
+         "command": "python",
+         "args": ["-m", "claude_session_coordinator"]
+       }
+     }
+   }
+   ```
 
 3. Restart Claude Code to load the MCP server
 
 ## Step 1: Sign On
 
-When Claude starts, it will automatically show available instances. Sign on to claim one:
+When Claude starts, it will automatically show available instances. Sign on to
+claim one:
 
 ```python
 # Claude will prompt you, or you can call directly:
@@ -157,7 +161,8 @@ sign_off()
 # }
 ```
 
-**Important:** Your session data is preserved even after signing off. Other sessions can access it, and you can resume it later.
+**Important:** Your session data is preserved even after signing off. Other
+sessions can access it, and you can resume it later.
 
 ## Complete Workflow Example
 
@@ -210,6 +215,7 @@ sign_off()  # Release instance
 If you have multiple Claude windows working on the same project:
 
 **Session 1 (claude_1):**
+
 ```python
 sign_on(session_id="claude_1")
 store_data("session:claude_1", "current_issue", 15)
@@ -217,6 +223,7 @@ store_data("issue:15", "status", "in_progress")
 ```
 
 **Session 2 (claude_2):**
+
 ```python
 sign_on(session_id="claude_2")
 
@@ -235,7 +242,8 @@ store_data("session:claude_2", "current_issue", 16)
 ## Best Practices
 
 1. **Always sign on first** - All data operations require an active session
-2. **Use clear scope names** - E.g., `session:claude_1`, `issue:15`, `project:metadata`
+2. **Use clear scope names** - E.g., `session:claude_1`, `issue:15`,
+   `project:metadata`
 3. **Store progress frequently** - Update todos and status regularly
 4. **Sign off when done** - Release your instance for others
 5. **Clean up old data** - Delete scopes for completed issues

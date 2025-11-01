@@ -1,6 +1,7 @@
 # Claude Session Coordinator - MCP Server
 
-Python MCP server enabling multiple Claude AI sessions to coordinate work through flexible storage adapters.
+Python MCP server enabling multiple Claude AI sessions to coordinate work
+through flexible storage adapters.
 
 ## Installation
 
@@ -36,6 +37,7 @@ Add to your MCP settings:
 ### 2. Start Claude Code
 
 The coordinator will automatically:
+
 - Detect your machine and project
 - Show available instances
 - Guide you through sign-on
@@ -86,14 +88,18 @@ sign_off()  # Releases your instance
 
 ### Adaptive Storage Selection
 
-**NEW:** Claude can now help you choose and configure the right storage adapter for your needs!
+**NEW:** Claude can now help you choose and configure the right storage
+adapter for your needs!
 
 On first run, Claude will ask about your coordination needs:
-- **Single-machine**: Just you, working on one computer → Uses local file storage
+
+- **Single-machine**: Just you, working on one computer → Uses local file
+  storage
 - **Multi-machine**: You working across multiple machines → Uses Redis
 - **Team collaboration**: Multiple people working together → Uses Redis
 
-Your choice is saved to `.claude/settings.local.json` (gitignored) and used automatically in future sessions.
+Your choice is saved to `.claude/settings.local.json` (gitignored) and used
+automatically in future sessions.
 
 **To configure or change settings:**
 
@@ -108,6 +114,7 @@ update_storage_settings(
 **To check current settings:**
 
 Read the `session://storage-config` resource to see:
+
 - Current storage adapter and coordination scope
 - Available adapters and their readiness status
 - Recommendations if your adapter doesn't match your scope
@@ -117,6 +124,7 @@ Read the `session://storage-config` resource to see:
 Switch backends via configuration:
 
 **Local Files (default):**
+
 ```json
 {
   "storage": {
@@ -129,6 +137,7 @@ Switch backends via configuration:
 ```
 
 **Redis:**
+
 ```json
 {
   "storage": {
@@ -141,8 +150,11 @@ Switch backends via configuration:
 ```
 
 **Configuration Hierarchy:**
-1. **Project settings** (`.claude/settings.local.json`) - Per-project user preferences ← NEW
-2. **Global config** (config file or environment) - Available adapters and credentials
+
+1. **Project settings** (`.claude/settings.local.json`) - Per-project user
+   preferences ← NEW
+2. **Global config** (config file or environment) - Available adapters and
+   credentials
 3. **Built-in defaults** - Fallback configuration
 
 ### MCP Resources
@@ -151,15 +163,18 @@ Read-only context provided automatically:
 
 - `session://context` - Current machine, project, available instances
 - `session://state/{id}` - Another session's state
-- `session://storage-config` - Storage adapter settings and recommendations ← NEW
+- `session://storage-config` - Storage adapter settings and recommendations
+  ← NEW
 
 ### MCP Prompts
 
 Guides Claude automatically:
 
-- `startup` - Shows status and guides sign-on (detects first-run for storage setup) ← ENHANCED
+- `startup` - Shows status and guides sign-on (detects first-run for storage
+  setup) ← ENHANCED
 - `sign_off` - Reminds about incomplete work
-- `first_run_storage` - Detailed guide for choosing storage adapter on first run ← NEW
+- `first_run_storage` - Detailed guide for choosing storage adapter on first
+  run ← NEW
 
 ## Configuration
 
@@ -193,11 +208,12 @@ See [Architecture Overview](../../docs/architecture/overview.md) for detailed de
 
 ### Scope Format
 
-```
+```text
 {machine}:{owner}/{repo}:{type}:{id}
 ```
 
 Examples:
+
 - `laptop:BANCS-Norway/project:session:claude_1`
 - `desktop:BANCS-Norway/project:instances`
 - `laptop:BANCS-Norway/project:issue:15`
@@ -205,6 +221,7 @@ Examples:
 ### Storage Adapter Interface
 
 All adapters implement:
+
 - `store(scope, key, value)`
 - `retrieve(scope, key) → value`
 - `delete(scope, key) → bool`
@@ -212,7 +229,7 @@ All adapters implement:
 - `list_scopes(pattern) → list[str]`
 - `delete_scope(scope) → bool`
 
-## Development
+## Testing
 
 ### Running Tests
 
@@ -237,9 +254,12 @@ ruff check src/ tests/
 
 ### Examples
 
-- [Basic Usage](examples/basic-usage.md) - Complete workflow guide with examples
-- [Multi-Session Coordination](examples/multi-session-coordination.md) - Advanced coordination patterns
-- [Configuration Example](examples/config.example.json) - Sample configuration file
+- [Basic Usage](examples/basic-usage.md) - Complete workflow guide with
+  examples
+- [Multi-Session Coordination](examples/multi-session-coordination.md) -
+  Advanced coordination patterns
+- [Configuration Example](examples/config.example.json) - Sample configuration
+  file
 
 ### Architecture & Design
 

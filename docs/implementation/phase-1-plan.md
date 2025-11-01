@@ -8,7 +8,7 @@
 
 ## Project Structure
 
-```
+```text
 claude-session-coordinator/
 ├── pyproject.toml              # Package metadata
 ├── README.md                   # User documentation
@@ -46,6 +46,7 @@ claude-session-coordinator/
 ### Phase 1.1: Core Storage Layer
 
 **Tasks:**
+
 1. Create project structure
 2. Implement `StorageAdapter` base class
 3. Implement `LocalFileAdapter`
@@ -53,12 +54,14 @@ claude-session-coordinator/
 5. Write adapter tests
 
 **Files to create:**
+
 - `src/claude_session_coordinator/adapters/base.py`
 - `src/claude_session_coordinator/adapters/local.py`
 - `src/claude_session_coordinator/adapters/factory.py`
 - `tests/test_adapters.py`
 
 **Acceptance criteria:**
+
 - All adapter methods work correctly
 - Tests pass for local file adapter
 - Can store, retrieve, delete data
@@ -68,17 +71,20 @@ claude-session-coordinator/
 ### Phase 1.2: Configuration & Detection
 
 **Tasks:**
+
 1. Implement configuration loader
 2. Implement machine ID detection
 3. Implement project detection (git)
 4. Write detection tests
 
 **Files to create:**
+
 - `src/claude_session_coordinator/config.py`
 - `src/claude_session_coordinator/detection.py`
 - `tests/test_detection.py`
 
 **Acceptance criteria:**
+
 - Config loads from file or defaults
 - Machine ID detected from hostname
 - Project detected from git remote
@@ -88,6 +94,7 @@ claude-session-coordinator/
 ### Phase 1.3: MCP Server & Tools
 
 **Tasks:**
+
 1. Implement MCP server initialization
 2. Implement `sign_on()` tool
 3. Implement data tools (`store_data`, `retrieve_data`, `delete_data`)
@@ -99,6 +106,7 @@ claude-session-coordinator/
 9. Write tool integration tests
 
 **Files to create:**
+
 - `src/claude_session_coordinator/server.py`
 - `src/claude_session_coordinator/tools/session.py`
 - `src/claude_session_coordinator/tools/data.py`
@@ -109,6 +117,7 @@ claude-session-coordinator/
 - `tests/test_resources.py`
 
 **Acceptance criteria:**
+
 - All 8 tools work via MCP
 - `sign_on()` establishes session context
 - Tools auto-prefix scopes with machine:project
@@ -122,15 +131,18 @@ claude-session-coordinator/
 ### Phase 1.4: CLI & Entry Point
 
 **Tasks:**
+
 1. Create CLI entry point
 2. Implement server startup
 3. Add version command
 4. Add config validation command
 
 **Files to create:**
+
 - `src/claude_session_coordinator/__main__.py`
 
 **Acceptance criteria:**
+
 - Can run: `python -m claude_session_coordinator`
 - Server starts and listens
 - Version info displays correctly
@@ -139,6 +151,7 @@ claude-session-coordinator/
 ### Phase 1.5: Documentation
 
 **Tasks:**
+
 1. Write comprehensive README
 2. Write API reference
 3. Write usage examples
@@ -146,6 +159,7 @@ claude-session-coordinator/
 5. Document configuration options
 
 **Files to create:**
+
 - `README.md`
 - `docs/API.md`
 - `examples/basic-usage.md`
@@ -153,6 +167,7 @@ claude-session-coordinator/
 - `examples/config.example.json`
 
 **Acceptance criteria:**
+
 - Installation instructions clear
 - All tools documented with examples
 - Configuration options explained
@@ -162,6 +177,7 @@ claude-session-coordinator/
 ### Phase 1.6: Packaging & Distribution
 
 **Tasks:**
+
 1. Configure pyproject.toml
 2. Test installation locally
 3. Test in fresh environment
@@ -169,11 +185,13 @@ claude-session-coordinator/
 5. Verify pip installation works
 
 **Files to create:**
+
 - `pyproject.toml`
 - `LICENSE`
 - `.gitignore`
 
 **Acceptance criteria:**
+
 - `pip install claude-session-coordinator` works
 - Command available after install
 - Works in Claude Code, VS Code, Cursor
@@ -565,18 +583,21 @@ def test_list_scopes_with_pattern(local_adapter):
 After Phase 1 is complete and stable:
 
 **Phase 2 - Redis Adapter:**
+
 - Implement RedisAdapter
 - Add atomic operations
 - Add TTL support
 - Add pub/sub notifications
 
 **Phase 3 - Advanced Features:**
+
 - S3 adapter for cloud storage
 - Admin CLI for diagnostics
 - Migration tool between adapters
 - Performance optimizations
 
 **Phase 4 - Enterprise:**
+
 - PostgreSQL adapter
 - Multi-tenancy support
 - Audit logging
