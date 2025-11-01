@@ -130,7 +130,32 @@ This project supports optional session coordination using specialized session re
 
 Both registries serve the same purpose with different naming schemes. Choose the one that matches your preference, or create your own!
 
-**Note:** Session registries are optional. If they don't exist in `.claude/`, you can work without them.
+**🚨 CRITICAL: Template vs Working Copy**
+
+Session registries use a two-tier system:
+
+- **DEV-SQUAD.md (Template):**
+  - Git Status: Tracked in repository
+  - Purpose: Reference template for new clones
+  - Updates: ❌ **NEVER update for session state changes**
+  - Use: Read-only reference for structure
+
+- **CLONES.md (Working Copy):**
+  - Git Status: Local only (not tracked)
+  - Purpose: Active session coordination
+  - Updates: ✅ **ALWAYS update for session state changes**
+  - Use: Real-time sign-on/sign-off, progress tracking
+
+**First-Time Setup:**
+
+If `.claude/CLONES.md` doesn't exist:
+```bash
+cp .claude/DEV-SQUAD.md .claude/CLONES.md
+```
+
+Then use CLONES.md for all session state updates.
+
+**Note:** Session registries are optional. If they don't exist in `.claude/`, you can work without them. This is a temporary manual solution until Phase 3 MCP automation.
 
 ## Development Guidelines
 
