@@ -29,6 +29,9 @@ env/
 .claude/settings.local.json
 *.session.json
 
+# MCP configuration (contains machine-specific paths)
+.mcp.json
+
 # Testing
 .pytest_cache/
 .coverage
